@@ -1,0 +1,14 @@
+{
+    "Experiment_Date": "",
+    "Mouse_ID": "",
+    "Mouse_Sex": "",
+    "Mouse_Age": "",
+    "Mouse_Strain": "",
+    "Recording_Site(s)": "",
+    "Image_Scale": {
+        "Value":"",
+        "Units": ""
+    },
+    "Sampling_Rate": "",
+    "Contributors":""
+}
