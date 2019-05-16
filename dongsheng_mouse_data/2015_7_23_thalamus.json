@@ -1,10 +1,10 @@
 {
-    "Experiment_Date": "2015-07-22",
-    "Mouse_ID": "AB",
+    "Experiment_Date": "2015-07-23",
+    "Mouse_ID": "AC",
     "Mouse_Sex": "male",
     "Mouse_Age": "3 months",
     "Mouse_Strain": "Ai94",
-    "Recording_Site(s)": "cortex and hippocampus",
+    "Recording_Site(s)": "thalamus",
     "Image_Scale": "128*128",
     "Sampling_Rate": "30",
     "Contributor(s)":"Dongsheng Xiao",
