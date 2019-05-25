@@ -82,7 +82,7 @@ class generate_dropped_frames:
         self.interpolated_frames = False
 
     def interpolate(self):
-        diff_per_frame = (self.last_frame-self.first_frame) / self.num_dropped_frames
+        diff_per_frame = (self.last_frame-self.first_frame) / (self.num_dropped_frames+1)
 
         interpolated_frames = numpy.empty(
             (self.number_of_dropped_frames, self.height, self.width),
