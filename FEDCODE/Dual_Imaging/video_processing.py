@@ -64,3 +64,43 @@ def get_locations_of_dropped_frames(timestamps, fps):
     # 50,000 for 30fps
     # 12,500 for 90fps
     return differences, numpy.where(differences > threshold)[0]
+
+class generate_dropped_frames:
+    """
+    Used to fill in dropped frames by interpolating between closest
+    available data pairs
+    """
+    
+    def __init__(self, first_frame, last_frame, num_dropped_frames, location):
+        self.height, self.width = first_frame.shape
+        self.num_dropped_frames = num_dropped_frames
+        # the frames need to be added
+        self.location = location
+        # Must eventually make it to use all channels.
+        self.first_frame = first_frame
+        self.last_frame = last_frame
+        self.interpolated_frames = False
+
+    def interpolate(self):
+        diff_per_frame = (self.last_frame-self.first_frame) / self.num_dropped_frames
+
+        interpolated_frames = numpy.empty(
+            (self.number_of_dropped_frames, self.height, self.width),
+            dtype=numpy.uint8
+        )
+        for frame_index in range(self.num_dropped_frames):
+            interpolated_frames[frame_index] = (frame_index+1)*diff_per_frame+self.first_frame
+        del self.first_frame
+        del self.last_frame
+        self.interpolated_frames = interpolated_frames
+
+
+def insert_interpolated_frames(frames, listof_generated_frames):
+    shifting_index = 0
+    for generated_frames in listof_generated_frames:
+        frames = numpy.insert(
+            frames, generated_frames.location + shifting_index + 1, generated_frames.interpolated_frames, 0
+        )
+        shifting_index += generated_frames.number_of_dropped_frames
+    return frames
+
