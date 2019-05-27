@@ -77,7 +77,7 @@ def generate_frames(frames, differences, locations, true_frame_rate):
     """
     Generator function for producing args to initialise list of DroppedFrames
 
-    :param frames: channel extracted from RAW file
+    :param frames: frames of channel extracted from RAW file
     :type: numpy.ndarray
     :param differences: differences between timestamps
     :type: numpy.ndarray
@@ -171,4 +171,35 @@ def insert_interpolated_frames(frames, list_of_generated_frames):
         )
         shifting_index += generated_frames.number_of_dropped_frames
     return frames
+
+
+def remove_dark_frames(frames, timestamps, threshold=4):
+    """
+    Remove the dark frames at the start and end of the footage
+    (Assume there are no dark frames in between the remaining frames)
+
+    :param frames: frames of channel extracted from RAW file
+    :type: numpy.ndarray
+    :param timestamps: cleaned timestamp array
+    :type: numpy.ndarray
+    :param threshold: threshold for average value per pixel
+    :type: float
+
+    :return: frames excluding dark frames at beginning and end of footage
+    :type: numpy.ndarray
+    :return: timestamp array excluding the corresponding timestamps
+    :type: numpy.ndarray
+    """
+    temporal_means = numpy.mean(frames, axis=(1, 2))
+    start_index, end_index = 0, temporal_means.shape[0]
+
+    for i, mean in enumerate(temporal_means):
+        if mean < threshold:
+            start_index = i
+            break
+    for i, mean in enumerate(numpy.flip(temporal_means, axis=0)):
+        if mean < threshold:
+            end_index = end_index-i
+            break
+    return frames[start_index:end_index], timestamps[start_index:end_index]
 
