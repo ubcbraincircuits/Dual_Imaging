@@ -191,15 +191,15 @@ def remove_dark_frames(frames, timestamps, threshold=4):
     :type: numpy.ndarray
     """
     temporal_means = numpy.mean(frames, axis=(1, 2))
-    start_index, end_index = 0, temporal_means.shape[0]
+    start, end = 0, temporal_means.shape[0]
 
     for i, mean in enumerate(temporal_means):
         if mean < threshold:
-            start_index = i
+            start = i
             break
     for i, mean in enumerate(numpy.flip(temporal_means, axis=0)):
         if mean < threshold:
-            end_index = end_index-i
+            end = end-i
             break
-    return frames[start_index:end_index], timestamps[start_index:end_index]
+    return frames[start:end], timestamps[start:end]
 
