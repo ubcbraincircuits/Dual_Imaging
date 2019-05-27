@@ -2,7 +2,8 @@ import numpy
 
 
 def extract_channel(filename, channel, width, height):
-    """ Extract channel from .RAW file containing image data
+    """
+    Extract channel from .RAW file containing image data
 
     :param filename: name of .RAW file containing image data
     :type: str
@@ -30,7 +31,9 @@ def extract_channel(filename, channel, width, height):
 
 
 def clean_raw_timestamps(filename):
-    """Perform cleaning routine on .RAW timestamps
+    """
+    Perform cleaning routine on .RAW timestamps
+
     :param filename: name of .RAW file containing timestamps
     :type:str
     :return: cleaned timestamp array
@@ -43,8 +46,9 @@ def clean_raw_timestamps(filename):
 
 
 def get_locations_of_dropped_frames(timestamps, fps):
-    """ Return delta(timestamps) and indices of timestamps of dropped
-        frames
+    """
+    Return delta(timestamps) and indices of timestamps of dropped
+    frames
 
     :param timestamps: 1-D numpy array containing timestamps
     :type: numpy.ndarray
@@ -65,7 +69,8 @@ def get_locations_of_dropped_frames(timestamps, fps):
     # 12,500 for 90fps
     return differences, numpy.where(differences > threshold)[0]
 
-class generate_dropped_frames:
+
+class DroppedFrames:
     """
     Used to fill in dropped frames by interpolating between closest
     available data pairs
@@ -95,11 +100,26 @@ class generate_dropped_frames:
         self.interpolated_frames = interpolated_frames
 
 
-def insert_interpolated_frames(frames, listof_generated_frames):
+def insert_interpolated_frames(frames, list_of_generated_frames):
+    """
+    Insert interpolated frames into input array as a substitute for
+    dropped frames
+
+    :param frames: array of frames from RAW channel with dropped frames
+    :type: numpy.ndarray
+    :param list_of_generated_frames: list of DroppedFrames objects
+    :type: list
+    :return: array of frames with dropped frames filled
+    :type: numpy.ndarray
+    """
     shifting_index = 0
-    for generated_frames in listof_generated_frames:
+    for generated_frames in list_of_generated_frames:
+        interpolated_frames = generated_frames.interpolate()
         frames = numpy.insert(
-            frames, generated_frames.location + shifting_index + 1, generated_frames.interpolated_frames, 0
+            frames,
+            interpolated_frames.location + shifting_index + 1,
+            interpolated_frames.interpolated_frames,
+            0
         )
         shifting_index += generated_frames.number_of_dropped_frames
     return frames
