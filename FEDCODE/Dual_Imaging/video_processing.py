@@ -13,6 +13,7 @@ def extract_channel(filename, channel, width, height):
     :type: int
     :param height: height of data
     :type: int
+
     :return: channel extracted from .RAW file
     :type: numpy.ndarray
     """
@@ -36,6 +37,7 @@ def clean_raw_timestamps(filename):
 
     :param filename: name of .RAW file containing timestamps
     :type:str
+
     :return: cleaned timestamp array
     :type: numpy.ndarray
     """
@@ -54,6 +56,7 @@ def get_locations_of_dropped_frames(timestamps, fps):
     :type: numpy.ndarray
     :param fps: frame rate of footage
     :type: int, one of: [30,90]
+
     :return differences between timestamps; dt
     :type: numpy.ndarray
     :return indices of timestamps where frames were dropped
@@ -71,6 +74,27 @@ def get_locations_of_dropped_frames(timestamps, fps):
 
 
 def generate_frames(frames, differences, locations, true_frame_rate):
+    """
+    Generator function for producing args to initialise list of DroppedFrames
+
+    :param frames: channel extracted from RAW file
+    :type: numpy.ndarray
+    :param differences: differences between timestamps
+    :type: numpy.ndarray
+    :param locations: indices of timestamps where frames were dropped
+    :type: numpy.ndarray
+    :param true_frame_rate: true frame rate of footage
+    :type: float
+
+    :return: last frame before missing frame(s)
+    :type: numpy.ndarray
+    :return: first frame after missing frame(s)
+    :type: numpy.ndarray
+    :return: number of dropped frames
+    :type: int
+    :return: indices where frames are missing
+    :type: numpy.ndarray
+    """
     for location in locations:
         number_of_dropped_frames = int(
             numpy.round(differences[location] / (1.e6/true_frame_rate))
@@ -86,6 +110,18 @@ class DroppedFrames:
     """
     
     def __init__(self, first_frame, last_frame, num_dropped_frames, location):
+        """
+        Create the DroppedFrames object
+
+        :param first_frame: last frame before missing frame(s)
+        :type: numpy.ndarray
+        :param last_frame: first frame after missing frame(s)
+        :type: numpy.ndarray
+        :param num_dropped_frames: number of dropped frames
+        :type: int
+        :param location: indices where frames are missing
+        :type: numpy.ndarray
+        """
         self.height, self.width = first_frame.shape
         self.num_dropped_frames = num_dropped_frames
         # the frames need to be added
@@ -96,6 +132,9 @@ class DroppedFrames:
         self.interpolated_frames = False
 
     def interpolate(self):
+        """
+        Produce missing frames by interpolating between first frame and last frame
+        """
         diff_per_frame = (self.last_frame-self.first_frame) / (self.num_dropped_frames+1)
 
         interpolated_frames = numpy.empty(
