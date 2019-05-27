@@ -70,6 +70,15 @@ def get_locations_of_dropped_frames(timestamps, fps):
     return differences, numpy.where(differences > threshold)[0]
 
 
+def generate_frames(frames, differences, locations, true_frame_rate):
+    for location in locations:
+        number_of_dropped_frames = int(
+            numpy.round(differences[location] / (1.e6/true_frame_rate))
+        ) - 1
+        first_frame, last_frame = frames[location:location+2]
+        yield first_frame, last_frame, number_of_dropped_frames, location
+
+
 class DroppedFrames:
     """
     Used to fill in dropped frames by interpolating between closest
