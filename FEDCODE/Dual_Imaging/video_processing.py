@@ -1,4 +1,7 @@
 import numpy
+from joblib import cpu_count, delayed, Parallel
+from scipy import signal
+from sklearn.utils import gen_even_slices
 
 
 def extract_channel(filename, channel, width, height):
@@ -181,7 +184,7 @@ def dark_frames_slice(frames, threshold=4):
 
     :param frames: frames of channel extracted from RAW file
     :type: numpy.ndarray
-    :kwarg threshold: threshold for average value per pixel
+    :param threshold: threshold for average value per pixel
     :type: float
 
     :return: slice object
@@ -224,6 +227,55 @@ def calculate_df_f0(frames):
     baseline = numpy.mean(frames, axis=0)
     dfd0 = numpy.divide(numpy.subtract(frames, baseline), baseline)
     del frames, baseline
-    dfd0[numpy.where(numpy.isnan(dfd0))] = -1 # Make the nans black.
+    dfd0[numpy.where(numpy.isnan(dfd0))] = -1  # Make the nans black.
 
     return dfd0, numpy.var(dfd0, axis=0)
+
+
+class Filter:
+    def __init__(self, low_freq_cutoff, high_freq_cutoff, frame_rate, order=4, rp=0.1):
+        """bandpass,
+        uses cheby1
+        """
+        nyq = frame_rate * 0.5
+        passband = low_freq_cutoff / nyq
+        stopband = high_freq_cutoff / nyq
+
+        numerator, denominator = signal.cheby1(
+            order, rp, Wn=[passband, stopband], btype='bandpass', analog=False
+        )
+        self.numerator, self.denominator = numerator, denominator
+
+    @staticmethod
+    def lfilter(numerator, denominator, data, axis=0):
+        """
+        Wrapper on signal.lfilter to constrain axis to time-axis
+        """
+        return signal.lfilter(numerator, denominator, data, axis)
+
+    def filter(self, frames, n_jobs=None):
+        """
+        Use joblib to apply scipy.filter.lfilter to the data in parallel
+
+        :param frames: frames to apply filter to
+        :type: numpy.ndarray
+        :param n_jobs: number of workers to utilise for parallel jobs
+        :type: None or int>0
+
+        :return: frames with applied lfilter
+        :type: numpy.ndarray
+        """
+        n_frames, height, width = frames.shape
+        frames = frames.reshape(n_frames, height*width)
+
+        if n_jobs is None:
+            n_jobs = cpu_count()
+
+        bandpass_filter = delayed(Filter.lfilter)
+        result = Parallel(n_jobs=n_jobs, verbose=0)(
+            bandpass_filter(frames[:, s], self.numerator, self.denominator)
+            for s in gen_even_slices(frames.shape[1], n_jobs)
+        )
+
+        return numpy.hstack(result).reshape(n_frames, height, width)
+
