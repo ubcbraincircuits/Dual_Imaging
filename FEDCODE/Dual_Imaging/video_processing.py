@@ -86,21 +86,22 @@ def generate_frames(frames, differences, locations, true_frame_rate):
     :param true_frame_rate: true frame rate of footage
     :type: float
 
-    :return: last frame before missing frame(s)
-    :type: numpy.ndarray
-    :return: first frame after missing frame(s)
-    :type: numpy.ndarray
-    :return: number of dropped frames
-    :type: int
-    :return: indices where frames are missing
-    :type: numpy.ndarray
+    :return tuple:
+        :first_frame: last frame before missing frame(s)
+        :type: numpy.ndarray
+        :last_frame: first frame after missing frame(s)
+        :type: numpy.ndarray
+        :number_of_dropped_frames: number of dropped frames
+        :type: int
+        :location: indices where frames are missing
+        :type: numpy.ndarray
     """
     for location in locations:
         number_of_dropped_frames = int(
             numpy.round(differences[location] / (1.e6/true_frame_rate))
         ) - 1
         first_frame, last_frame = frames[location:location+2]
-        yield first_frame, last_frame, number_of_dropped_frames, location
+        yield (first_frame, last_frame, number_of_dropped_frames, location)
 
 
 class DroppedFrames:
@@ -173,22 +174,18 @@ def insert_interpolated_frames(frames, list_of_generated_frames):
     return frames
 
 
-def remove_dark_frames(frames, timestamps, threshold=4):
+def dark_frames_slice(frames, threshold=4):
     """
     Remove the dark frames at the start and end of the footage
     (Assume there are no dark frames in between the remaining frames)
 
     :param frames: frames of channel extracted from RAW file
     :type: numpy.ndarray
-    :param timestamps: cleaned timestamp array
-    :type: numpy.ndarray
-    :param threshold: threshold for average value per pixel
+    :kwarg threshold: threshold for average value per pixel
     :type: float
 
-    :return: frames excluding dark frames at beginning and end of footage
-    :type: numpy.ndarray
-    :return: timestamp array excluding the corresponding timestamps
-    :type: numpy.ndarray
+    :return: slice object
+    :type: slice
     """
     temporal_means = numpy.mean(frames, axis=(1, 2))
     start, end = 0, temporal_means.shape[0]
@@ -197,9 +194,14 @@ def remove_dark_frames(frames, timestamps, threshold=4):
         if mean < threshold:
             start = i
             break
-    for i, mean in enumerate(numpy.flip(temporal_means, axis=0)):
+
+    reversed_temporal_means = numpy.flip(temporal_means, axis=0)
+    del temporal_means
+
+    for i, mean in enumerate(reversed_temporal_means):
         if mean < threshold:
             end = end-i
             break
-    return frames[start:end], timestamps[start:end]
+
+    return slice(start, end)
 
