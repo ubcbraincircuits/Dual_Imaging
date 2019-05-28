@@ -234,8 +234,19 @@ def calculate_df_f0(frames):
 
 class Filter:
     def __init__(self, low_freq_cutoff, high_freq_cutoff, frame_rate, order=4, rp=0.1):
-        """bandpass,
-        uses cheby1
+        """
+        Create Bandpass Filter object with frequency cutoff attributes
+
+        :param low_freq_cutoff: first critical frequency
+        :type: float>0
+        :param high_freq_cutoff: second critical frequency
+        :type: float>0
+        :param frame_rate: frame rate of the footage
+        :type: float>0
+        :param order: the order of the filter
+        :type: int
+        :param rp: maximum ripple allowed below unity gain in the passband. Specified in decibels, as a positive number
+        :type: float>0
         """
         nyq = frame_rate * 0.5
         passband = low_freq_cutoff / nyq
@@ -278,4 +289,3 @@ class Filter:
         )
 
         return numpy.hstack(result).reshape(n_frames, height, width)
-
