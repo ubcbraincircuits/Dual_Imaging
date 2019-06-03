@@ -1,0 +1,22 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[latin1]{inputenc}
+
+\title{UBC Dynamic Brain Circuits Cluster Data Management Report}
+\author{Ashutosh Bhudia\thanks{Jeffrey LeDue, Timothy Murphy}}
+\date{03/14/15}
+\begin{document}
+\maketitle
+\section{Introduction}
+Intro goes here
+\section{Data Archival Options}
+In this section I compare the costs of different storage solutions.
+The storage providers had to be chosen to meet the bare minimum criterion that the data should be stored in Cananda. Of the major cloud providers, the following had data centers that met this condition:
+\begin{itemize}
+  \item Amazon S3 Glacier (Canada Central)
+  \item Google Cloud (Montreal)  
+  \item Microsoft Azure (Canada Central and Canada East)
+\end{itemize}
+\end{document}
