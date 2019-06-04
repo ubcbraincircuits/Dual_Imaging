@@ -3,20 +3,131 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[latin1]{inputenc}
-
+\setlength{\voffset}{-0.75in}
+\setlength{\headsep}{5pt}
+\usepackage[bottom=5pt]{geometry}
+\usepackage{multirow}
 \title{UBC Dynamic Brain Circuits Cluster Data Management Report}
-\author{Ashutosh Bhudia\thanks{Jeffrey LeDue, Timothy Murphy}}
+\author{Ashutosh Bhudia\thanks{Supervised by Jeffrey LeDue, Timothy Murphy}}
 \date{03/14/15}
+
+%-----------------------------BEGIN DOCUMENT------------------------------------
 \begin{document}
 \maketitle
 \section{Introduction}
 Intro goes here
+
+%----------------------------DATA ARCHIVAL OPTIONS------------------------------
 \section{Data Archival Options}
 In this section I compare the costs of different storage solutions.
-The storage providers had to be chosen to meet the bare minimum criterion that the data should be stored in Cananda. Of the major cloud providers, the following had data centers that met this condition:
+The storage providers had to be chosen to meet the bare minimum criterion that the data should be stored in Canada. Of the major cloud providers, the following had data centers that met this condition:
+
 \begin{itemize}
   \item Amazon S3 Glacier (Canada Central)
   \item Google Cloud (Montreal)  
   \item Microsoft Azure (Canada Central and Canada East)
+
 \end{itemize}
+
+%----------------------------------AMAZON---------------------------------------
+\subsection{Amazon S3 Glacier\footnote{https://aws.amazon.com/glacier/pricing/}}
+From their website, these are the costs of various transactions:
+
+
+\subsubsection{Retrieval Costs}
+Costs of retrieving objects from buckets. Billed Monthly. Note that archival storage (Glacier) on AWS has the highest retrieval costs.
+\vspace{0px}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Retrieval Time} & \textbf{USD per Gigabyte Month} \\ \hline
+Expedited               & 0.033               \\ \hline
+Standard                & 0.011               \\ \hline
+Bulk                    & 0.00275             \\ \hline
+\end{tabular}
+\end{table}
+
+\pagebreak
+\subsubsection{Request Pricing}
+Billed Monthly.
+\vspace{0px}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Retrieval Time} & \textbf{USD per 1,000 requsts} \\ \hline
+Expedited               & 11.00                          \\ \hline
+Standard                & 0.055                          \\ \hline
+Bulk                    & 0.0275                         \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Request} & \textbf{USD per 1,000 requsts} \\ \hline
+UPLOAD               & 0.055                      \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Internet Data Transfer Pricing}
+Billed Monthly.
+\vspace{0px}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Inbound Tiers (TB)}  & \textbf{USD per GB}        \\ \hline
+All data into Glacier        & 0.00                       \\ \hline
+\textbf{Outbound Tiers (TB)} & \textbf{USD per GB}        \\ \hline
+0 - 0.001                    & 0.00                       \\ \hline
+0.001 - 10                   & 0.09                       \\ \hline
+10 - 50                      & 0.085                      \\ \hline
+50 - 150                     & 0.07                       \\ \hline
+\textgreater{} 150           & 0.05                       \\ \hline
+\end{tabular}
+\end{table}
+
+%------------------------------------AZURE-------------------------------------
+\subsection{Microsoft Azure\footnote{https://azure.microsoft.com/en-ca/pricing/details/storage/blobs/}}
+Some definitions of storage classes from their website\footnote{https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers}
+\begin{itemize}
+  \item Hot - Optimized for storing data that is accessed frequently.
+  \item Cool - Optimized for storing data that is infrequently accessed and stored for at least 30 days.
+  \item Archive - Optimized for storing data that is rarely accessed and stored for at least 180 days with flexible latency requirements (on the order of hours).
+  
+\subsubsection{Data Storage Prices}
+
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|l|l|l|l|l|l|c|c|l|l|l|l|l|l|c|c|c|}
+\hline
+\multirow{4}{*}{\textbf{Inbound Tiers (TB)}} & \multicolumn{18}{c|}{\textbf{CAD per Gigabyte Month}}                                                                                                                                                                                                                                                                                                                                                  \\ \cline{2-19} 
+                                             & \multicolumn{9}{c|}{\textbf{Canada Central}}                                                                                                                                            & \multicolumn{9}{c|}{\textbf{Canada East}}                                                                                                                                                                    \\ \cline{2-19} 
+                                             & \multicolumn{3}{c|}{\textbf{Hot}}             & \multicolumn{3}{c|}{\textbf{Cool}}            & \multicolumn{3}{c|}{\textbf{Archive}}                                                   & \multicolumn{3}{c|}{\textbf{Hot}}             & \multicolumn{3}{c|}{\textbf{Cool}}            & \multicolumn{3}{c|}{\textbf{Archive}}                                                                        \\ \cline{2-19} 
+                                             & \textbf{LRS} & \textbf{GRS} & \textbf{RA GRS} & \textbf{LRS} & \textbf{GRS} & \textbf{RA GRS} & \textbf{LRS} & \multicolumn{1}{l|}{\textbf{GRS}} & \multicolumn{1}{l|}{\textbf{RA GRS}} & \textbf{LRS} & \textbf{GRS} & \textbf{RA GRS} & \textbf{LRS} & \textbf{GRS} & \textbf{RA GRS} & \multicolumn{1}{l|}{\textbf{LRS}} & \multicolumn{1}{l|}{\textbf{GRS}} & \multicolumn{1}{l|}{\textbf{RA GRS}} \\ \hline
+\multicolumn{1}{|l|}{0 - 50}                 & 0.0256       & 0.0512       & 0.064           & 0.0141       & 0.0282       & 0.0352          & 0.0029       & -                                 & -                                    & 0.0256       & 0.0512       & 0.064           & 0.0141       & 0.0282       & 0.0352          & -                                 & -                                 & -                                    \\ \hline
+\multicolumn{1}{|l|}{50 - 500}               & 0.0246       & 0.0492       & 0.0615          & 0.0141       & 0.0282       & 0.0352          & 0.0029       & -                                 & -                                    & 0.0246       & 0.0492       & 0.0615          & 0.0141       & 0.0282       & 0.0352          & -                                 & -                                 & -                                    \\ \hline
+\multicolumn{1}{|l|}{\textgreater 500}       & 0.0236       & 0.0472       & 0.0589          & 0.0141       & 0.0282       & 0.0352          & 0.0029       & -                                 & -                                    & 0.0236       & 0.0472       & 0.0589          & 0.0141       & 0.0282       & 0.0352          & -                                 & -                                 & -                                    \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
 \end{document}
