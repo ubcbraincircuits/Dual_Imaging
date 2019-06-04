@@ -289,3 +289,18 @@ class Filter:
         )
 
         return numpy.hstack(result).reshape(n_frames, height, width)
+
+
+def correct_channel_a_by_b(a,b):
+    """
+    Frames of channel a corrected by frames of channel b
+    a/(1+b)
+
+    :param a: Frames of channel a
+    :type: numpy.ndarray
+    :param b: Frames of channel b
+    :type: numpy.ndarray
+
+    :return: a/(1+b)
+    """
+    return a/(1+b)
