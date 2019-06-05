@@ -2,9 +2,10 @@
 
 import matplotlib.animation as Animation
 import matplotlib.pyplot as plt
+from numpy import round
 
 
-def animate_processed_frames(left, right, metadata, filename, title, figsize=(20, 10), cmap='viridis'):
+def animate_processed_frames(left, right, metadata, filename, title, true_framerate,figsize=(20, 10), cmap='viridis'):
     FFMpegWriter = Animation.writers['ffmpeg']
     writer = FFMpegWriter(fps=30, metadata=metadata)
     fig = plt.figure(figsize=figsize)
@@ -13,7 +14,7 @@ def animate_processed_frames(left, right, metadata, filename, title, figsize=(20
     l_title1 = 'Left Mouse Red'
     l_red = left[l_title1]
     l_ax1.set_title(l_title1)
-    l_img1 = lax1.imshow(
+    l_img1 = l_ax1.imshow(
         l_red[0],
         cmap=cmap,
         vmin=-0.2,
@@ -136,7 +137,7 @@ def animate_processed_frames(left, right, metadata, filename, title, figsize=(20
 
     with writer.saving(fig, filename, 100):  # !!!
         for i in range(l_green.shape[0]):
-            current_time = np.round(float(i) / TRUE_FRAMERATE, 3)
+            current_time = round(float(i) / true_framerate, 3)
             fig.suptitle(
                 title +
                 "Current Frame: {5d} ".format(i + 1) + \
