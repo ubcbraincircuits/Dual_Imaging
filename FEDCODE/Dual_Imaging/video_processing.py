@@ -178,36 +178,69 @@ def insert_interpolated_frames(frames, list_of_generated_frames):
     return frames
 
 
-def dark_frames_slice(frames, threshold=4):
-    """
-    Remove the dark frames at the start and end of the footage
-    (Assume there are no dark frames in between the remaining frames)
+class DarkFramesSlice:
+    @classmethod
+    def threshold_method(cls, frames, threshold=4):
+        """
+        Remove the dark frames at the start and end of the footage
+        (Assume there are no dark frames in between the remaining frames)
 
-    :param frames: frames of channel extracted from RAW file
-    :type: numpy.ndarray
-    :param threshold: threshold for average value per pixel
-    :type: float
+        :param frames: frames of channel extracted from RAW file
+        :type: numpy.ndarray
+        :param threshold: threshold for average value per pixel
+        :type: float
 
-    :return: slice object
-    :type: slice
-    """
-    temporal_means = numpy.mean(frames, axis=(1, 2))
-    start, end = 0, temporal_means.shape[0]
+        :return: slice object
+        :type: slice
+        """
+        temporal_means = numpy.mean(frames, axis=(1, 2))
+        start, end = 0, temporal_means.shape[0]
 
-    for i, mean in enumerate(temporal_means):
-        if mean > threshold:
-            start = i
-            break
+        for i, mean in enumerate(temporal_means):
+            if mean > threshold:
+                start = i
+                break
 
-    reversed_temporal_means = numpy.flip(temporal_means, axis=0)
-    del temporal_means
+        reversed_temporal_means = numpy.flip(temporal_means, axis=0)
+        del temporal_means
 
-    for i, mean in enumerate(reversed_temporal_means):
-        if mean < threshold:
-            end = end-i
-            break
+        for i, mean in enumerate(reversed_temporal_means):
+            if mean < threshold:
+                end = end-i
+                break
 
-    return slice(start, end)
+        return slice(start, end)
+
+    @classmethod
+    def gradient_method(cls, behaviour_frames, sigma=15, spacetime=False):
+        """
+
+        :param behaviour_frames:
+        :param sigma:
+        :param spacetime:
+        :return:
+        """
+        if spacetime:
+            means = numpy.mean(behaviour_frames, axis=1)
+        else:
+            means = numpy.mean(behaviour_frames, axis=(1, 2))
+        grads = numpy.gradient(means)
+        mean = numpy.mean(grads)
+        std = numpy.std(grads)
+        start, end = 0, means.shape[0]
+        threshold = mean + std * sigma
+        for i, grad in enumerate(grads):
+            if abs(grad) > threshold:
+                start = i
+                break
+        reversed_grads = numpy.flip(grads, axis=0)
+        del grads
+        for i, grad in enumerate(reversed_grads):
+            if abs(grad) < threshold:
+                end = end - i
+                break
+
+        return slice(start, end)
 
 
 def calculate_df_f0(frames):
@@ -341,32 +374,4 @@ def load_frames(filename, color):
     return frames
 
 
-def get_dark_frames_gradient_method(behaviour_frames, sigma=15, spacetime=False):
-    """
 
-    :param behaviour_frames:
-    :param sigma:
-    :param spacetime:
-    :return:
-    """
-    if spacetime:
-        means = numpy.mean(behaviour_frames, axis=1)
-    else:
-        means = numpy.mean(behaviour_frames, axis=(1, 2))
-    grads = numpy.gradient(means)
-    mean = numpy.mean(grads)
-    std = numpy.std(grads)
-    start, end = 0, means.shape[0]
-    threshold = mean + std*sigma
-    for i, grad in enumerate(grads):
-        if abs(grad) > threshold:
-            start = i
-            break
-    reversed_grads = numpy.flip(grads, axis=0)
-    del grads
-    for i, grad in enumerate(reversed_grads):
-        if abs(grad) < threshold:
-            end = end-i
-            break
-
-    return slice(start, end)
