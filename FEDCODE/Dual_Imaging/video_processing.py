@@ -1,3 +1,4 @@
+import cv2
 import numpy
 from joblib import cpu_count, delayed, Parallel
 from scipy import signal
@@ -194,7 +195,7 @@ def dark_frames_slice(frames, threshold=4):
     start, end = 0, temporal_means.shape[0]
 
     for i, mean in enumerate(temporal_means):
-        if mean < threshold:
+        if mean > threshold:
             start = i
             break
 
@@ -291,7 +292,7 @@ class Filter:
         return numpy.hstack(result).reshape(n_frames, height, width)
 
 
-def correct_channel_a_by_b(a,b):
+def correct_channel_a_by_b(a, b):
     """
     Frames of channel a corrected by frames of channel b
     a/(1+b)
@@ -304,3 +305,68 @@ def correct_channel_a_by_b(a,b):
     :return: a/(1+b)
     """
     return a/(1+b)
+
+
+def load_frames(filename, color):
+    """
+    Load frames of .h264/5 as color channel or B&W frames as numpy array
+
+    :param filename: path to video file
+    :type: str
+    :param color: one of 'red', 'green', 'blue', False
+    :type: str or bool
+
+    :return: video frames
+    :type: numpy.ndarray
+    """
+    channel = {'red': 0, 'green': 1, 'blue': 2}[color]
+    first_frame = True
+    cap = cv2.VideoCapture(filename)
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if not color:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        else:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[..., channel]
+        if first_frame:
+            frames = numpy.expand_dims(frame, 0)
+            first_frame = False
+        else:
+            frames = numpy.concatenate(
+                (frames, numpy.expand_dims(frame, 0)),
+                axis=0
+            )
+    return frames
+
+
+def get_dark_frames_gradient_method(behaviour_frames, sigma=15, spacetime=False):
+    """
+
+    :param behaviour_frames:
+    :param sigma:
+    :param spacetime:
+    :return:
+    """
+    if spacetime:
+        means = numpy.mean(behaviour_frames, axis=1)
+    else:
+        means = numpy.mean(behaviour_frames, axis=(1, 2))
+    grads = numpy.gradient(means)
+    mean = numpy.mean(grads)
+    std = numpy.std(grads)
+    start, end = 0, means.shape[0]
+    threshold = mean + std*sigma
+    for i, grad in enumerate(grads):
+        if abs(grad) > threshold:
+            start = i
+            break
+    reversed_grads = numpy.flip(grads, axis=0)
+    del grads
+    for i, grad in enumerate(reversed_grads):
+        if abs(grad) < threshold:
+            end = end-i
+            break
+
+    return slice(start, end)
