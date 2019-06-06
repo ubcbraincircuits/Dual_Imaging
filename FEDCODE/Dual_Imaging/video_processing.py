@@ -179,8 +179,8 @@ def insert_interpolated_frames(frames, list_of_generated_frames):
 
 
 class DarkFramesSlice:
-    @classmethod
-    def threshold_method(cls, frames, threshold=4):
+    @staticmethod
+    def threshold_method(frames, threshold=4):
         """
         Remove the dark frames at the start and end of the footage
         (Assume there are no dark frames in between the remaining frames)
@@ -211,8 +211,8 @@ class DarkFramesSlice:
 
         return slice(start, end)
 
-    @classmethod
-    def gradient_method(cls, behaviour_frames, sigma=15, spacetime=False):
+    @staticmethod
+    def gradient_method(behaviour_frames, sigma=15, spacetime=False):
         """
 
         :param behaviour_frames:
