@@ -373,3 +373,27 @@ def load_frames(filename, color):
             )
     return frames
 
+
+def video_synchronisation_indices(A_period, A_frames, B_period, B_frames):
+    if B_period < A_period:
+        raise ValueError("First video has lower frame rate than second video")
+
+    # Total length of the videos. The first frame comes in at t=0
+    # so the adjustment has to be made when doing the calculation
+    A_total_time, B_total_time = A_period * (A_frames - 1), B_period * (B_frames - 1)
+    t_max = min(A_total_time, B_total_time)
+    A = numpy.arange(0, t_max, A_period)
+    B = numpy.arange(0, t_max, B_period)
+
+    A_indices, B_indices = [], []
+    for B_index, timestamp in enumerate(B):
+        abs_difference = numpy.abs(A - timestamp)
+        minimum = abs_difference.min()
+        # If the closest match to the timestamp in B is within one
+        # period of B, we can use it
+        # We also keep the corresponding index of B if B is shorter than A
+        if minimum <= B_period:
+            A_indices.append(numpy.where(abs_difference == minimum)[0][0])
+            B_indices.append(B_index)
+
+    return A_indices, B_indices
