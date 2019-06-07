@@ -352,7 +352,10 @@ def load_frames(filename, color):
     :return: video frames
     :type: numpy.ndarray
     """
-    channel = {'red': 0, 'green': 1, 'blue': 2}[color]
+    try:
+        channel = {'red': 0, 'green': 1, 'blue': 2}[color]
+    except:
+        pass
     first_frame = True
     cap = cv2.VideoCapture(filename)
     while cap.isOpened():
