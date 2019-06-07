@@ -58,8 +58,8 @@ def get_locations_of_dropped_frames(timestamps, threshold):
 
     :param timestamps: 1-D numpy array containing timestamps
     :type: numpy.ndarray
-    :param fps: frame rate of footage
-    :type: int, one of: [30,90]
+    :param threshold in microseconds?
+    :type: float
 
     :return differences between timestamps; dt
     :type: numpy.ndarray
