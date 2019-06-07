@@ -245,8 +245,8 @@ class DarkFramesSlice:
 
 def calculate_df_f0(frames):
     """
-    Calculate df/d0, the fractional change in intensity for each pixel
-    and the variance of df/d0
+    Calculate df/f0, the fractional change in intensity for each pixel
+    and the variance of df/f0
 
 
     :param frames: 3D array of image frames
@@ -259,11 +259,11 @@ def calculate_df_f0(frames):
     """
     frames = frames.astype(numpy.float32)
     baseline = numpy.mean(frames, axis=0)
-    dfd0 = numpy.divide(numpy.subtract(frames, baseline), baseline)
+    df_f0 = numpy.divide(numpy.subtract(frames, baseline), baseline)
     del frames, baseline
-    dfd0[numpy.where(numpy.isnan(dfd0))] = -1  # Make the nans black.
+    df_f0[numpy.where(numpy.isnan(df_f0))] = -1  # Make the nans black.
 
-    return dfd0, numpy.var(dfd0, axis=0)
+    return df_f0, numpy.var(df_f0, axis=0)
 
 
 class Filter:
@@ -372,6 +372,4 @@ def load_frames(filename, color):
                 axis=0
             )
     return frames
-
-
 
