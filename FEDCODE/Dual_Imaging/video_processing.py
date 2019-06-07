@@ -51,7 +51,7 @@ def clean_raw_timestamps(filename):
     return raw_timestamps[numpy.where(raw_timestamps > 0)]
 
 
-def get_locations_of_dropped_frames(timestamps, fps):
+def get_locations_of_dropped_frames(timestamps, threshold):
     """
     Return delta(timestamps) and indices of timestamps of dropped
     frames
@@ -67,8 +67,6 @@ def get_locations_of_dropped_frames(timestamps, fps):
     :type: numpy.ndarray
     """
     differences = numpy.diff(timestamps, 1)
-    thresholds = {30: 50_000, 90: 12_500}
-    threshold = thresholds[fps]
     print("Mean filtered frame difference: ", numpy.mean(
         differences[numpy.where(differences <= threshold)]
     ))
@@ -346,7 +344,7 @@ def load_frames(filename, color):
 
     :param filename: path to video file
     :type: str
-    :param color: one of 'red', 'green', 'blue', False
+    :param color: one of 'red', 'green', 'blue', or False for B&W
     :type: str or bool
 
     :return: video frames
