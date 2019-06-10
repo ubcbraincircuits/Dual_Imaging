@@ -5,51 +5,64 @@ from scipy import signal
 from sklearn.utils import gen_even_slices
 
 
-def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8"):
-    """
-    Extract channels from .RAW file containing image data
+def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8", num_channels=3):
+   """
+   Extract channels from .RAW file containing image data
 
-    :param filename: name of .RAW file containing image data
-    :type: str
-    :param width: width of data
-    :type: int
-    :param height: height of data
-    :type: int
-    :param channel: name of channel to extract
-    :type: optional str, one of: ('all', 'red', 'blue', 'green'). default is 'all'
-    :param dtype: numpy datatype
-    :type: optional str. defula in 'uint8'
+   :param filename: name of .RAW file containing image data
+   :type: str
+   :param width: width of data
+   :type: int
+   :param height: height of data
+   :type: int
+   :param channel: name of channel to extract
+   :type: optional str, one of: ('all', 'red', 'blue', 'green'). default is 'all'
+   :param dtype: numpy datatype. default is 'uint8'
+   :type: optional str
+   :param num_channels, one of (1,3). defualt is 3
+   :type: optional int
 
-    :return: channel(s) extracted from .RAW file
-    :type: numpy.ndarray
-    """
-    if channel not in ('all', 'red', 'blue', 'green'):
-        raise AttributeError(
-        "Keyword 'channel' must be one of: ('all', 'red', 'blue', 'green')"
-        )
-        
-    try:
-        datatype = getattr(numpy, dtype)
-    except AttributeError:
-        raise AttributeError(f'dtype numpy.{dtype} does not exist')
-    
-    with open(filename, "rb") as file:
-        raw_frames = numpy.fromfile(file, dtype=datatype)
+   :return: channel(s) extracted from .RAW file
+   :type: numpy.ndarray
+   """
+   if num_channels not in (1,3):
+       raise AttributeError("Keyword 'num_channels' must be one of (1,3)")
+   try:
+       datatype = getattr(numpy, dtype)
+   except AttributeError:
+       raise AttributeError(f'dtype numpy.{dtype} does not exist')
+   if num_channels is 3:
+       if channel not in ('all', 'red', 'blue', 'green'):
+           raise AttributeError(
+           "Keyword 'channel' must be one of: ('all', 'red', 'blue', 'green')"
+           )
 
-    time_dim_float = raw_frames.shape[0] / (width*height*3)
-    time_dim = int(time_dim_float)
-    if time_dim != time_dim_float:
-        raise Exception('Invalid input file, width or height')
-    raw_frames = numpy.reshape(raw_frames, (time_dim, height, width, 3))
- 
-    channels = {'red': 0, 'green': 1, 'blue': 2}.get(channel)   
-    if channels is None:
-        #return all frames
-        return raw_frames
-    else:
-        #return a particular channel
-        print(f"Dimensions of {channel} channel: {numpy.shape(raw_frames)[0:-1]}")
-        return raw_frames[..., channels[channel]]
+       with open(filename, "rb") as file:
+           raw_frames = numpy.fromfile(file, dtype=datatype)
+
+       time_dim_float = raw_frames.shape[0] / (width*height*3)
+       time_dim = int(time_dim_float)
+       if time_dim != time_dim_float:
+           raise Exception('Invalid input file or arguments')
+       raw_frames = numpy.reshape(raw_frames, (time_dim, height, width, 3))
+
+       channels = {'red': 0, 'green': 1, 'blue': 2}.get(channel)
+       if channels is None:
+           #return all frames
+           return raw_frames
+       else:
+           #return a particular channel
+           return raw_frames[..., channels[channel]]
+   else:
+       #num_channels is 1
+       with open(filename, "rb") as file:
+           raw_frames = numpy.fromfile(file, dtype=datatype)
+           time_dim_float = raw_frames.shape[0] / (width*height)
+           time_dim = int(time_dim_float)
+           if time_dim != time_dim_float:
+               raise Exception('Invalid input file or arguments')
+           raw_frames = numpy.reshape(raw_frames, (time_dim, height, width))
+           return raw_frames
 
 
 def clean_raw_timestamps(filename):
