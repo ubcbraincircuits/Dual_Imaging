@@ -5,34 +5,51 @@ from scipy import signal
 from sklearn.utils import gen_even_slices
 
 
-def extract_channel(filename, channel, width, height):
+def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8"):
     """
-    Extract channel from .RAW file containing image data
+    Extract channels from .RAW file containing image data
 
     :param filename: name of .RAW file containing image data
     :type: str
-    :param channel: name of channel to extract
-    :type: str, one of: ['red', 'blue', 'green']
     :param width: width of data
     :type: int
     :param height: height of data
     :type: int
+    :param channel: name of channel to extract
+    :type: optional str, one of: ('all', 'red', 'blue', 'green'). default is 'all'
+    :param dtype: numpy datatype
+    :type: optional str. defula in 'uint8'
 
-    :return: channel extracted from .RAW file
+    :return: channel(s) extracted from .RAW file
     :type: numpy.ndarray
     """
+    if channel not in ('all', 'red', 'blue', 'green'):
+        raise AttributeError(
+        "Keyword 'channel' must be one of: ('all', 'red', 'blue', 'green')"
+        )
+        
+    try:
+        datatype = getattr(numpy, dtype)
+    except AttributeError:
+        raise AttributeError(f'dtype np.{dtype} does not exist')
+    
     with open(filename, "rb") as file:
-        raw_frames = numpy.fromfile(file, dtype=numpy.uint8)
+        raw_frames = numpy.fromfile(file, dtype=datatype)
 
     time_dim_float = raw_frames.shape[0] / (width*height*3)
     time_dim = int(time_dim_float)
     if time_dim != time_dim_float:
         raise Exception('Invalid input file, width or height')
     raw_frames = numpy.reshape(raw_frames, (time_dim, height, width, 3))
-    print(f"Dimensions of {channel} channel: {numpy.shape(raw_frames)[0:-1]}")
-    channels = {'red': 0, 'green': 1, 'blue': 2}
-
-    return raw_frames[..., channels[channel]]
+ 
+    channels = {'red': 0, 'green': 1, 'blue': 2}.get(channel)   
+    if channels is None:
+        #return all frames
+        return raw_frames
+    else:
+        #return a particular channel
+        print(f"Dimensions of {channel} channel: {numpy.shape(raw_frames)[0:-1]}")
+        return raw_frames[..., channels[channel]]
 
 
 def clean_raw_timestamps(filename):
@@ -58,7 +75,8 @@ def get_locations_of_dropped_frames(timestamps, threshold):
 
     :param timestamps: 1-D numpy array containing timestamps
     :type: numpy.ndarray
-    :param threshold in microseconds?
+    :param thereshold: threshold in microseconds. suggested 50,000 for 30fps, 
+                       12,500 for 90fps
     :type: float
 
     :return differences between timestamps; dt
@@ -70,8 +88,7 @@ def get_locations_of_dropped_frames(timestamps, threshold):
     print("Mean filtered frame difference: ", numpy.mean(
         differences[numpy.where(differences <= threshold)]
     ))
-    # 50,000 for 30fps
-    # 12,500 for 90fps
+
     return differences, numpy.where(differences > threshold)[0]
 
 
@@ -344,16 +361,17 @@ def load_frames(filename, color):
 
     :param filename: path to video file
     :type: str
-    :param color: one of 'red', 'green', 'blue', or False for B&W
+    :param color: one of ('red', 'green', 'blue', False), with False for B&W
     :type: str or bool
 
     :return: video frames
     :type: numpy.ndarray
     """
-    try:
-        channel = {'red': 0, 'green': 1, 'blue': 2}[color]
-    except:
-        pass
+    channel = {'red': 0, 'green': 1, 'blue': 2}.get(color)
+    if channel is None:
+        raise AttributeError(
+            "Argument 'color' must be one of ('red', 'green', 'blue', False)"
+            )
     first_frame = True
     cap = cv2.VideoCapture(filename)
     while cap.isOpened():
