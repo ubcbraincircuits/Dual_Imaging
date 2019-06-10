@@ -31,7 +31,7 @@ def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8"):
     try:
         datatype = getattr(numpy, dtype)
     except AttributeError:
-        raise AttributeError(f'dtype np.{dtype} does not exist')
+        raise AttributeError(f'dtype numpy.{dtype} does not exist')
     
     with open(filename, "rb") as file:
         raw_frames = numpy.fromfile(file, dtype=datatype)
