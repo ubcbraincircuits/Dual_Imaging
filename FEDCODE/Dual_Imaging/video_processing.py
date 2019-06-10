@@ -158,7 +158,7 @@ class DroppedFrames:
         diff_per_frame = (self.last_frame-self.first_frame) / (self.num_dropped_frames+1)
 
         interpolated_frames = numpy.empty(
-            (self.number_of_dropped_frames, self.height, self.width),
+            (self.num_of_dropped_frames, self.height, self.width),
             dtype=numpy.uint8
         )
         for frame_index in range(self.num_dropped_frames):
