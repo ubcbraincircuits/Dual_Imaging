@@ -90,7 +90,7 @@ def get_locations_of_dropped_frames(timestamps, threshold):
     :type: numpy.ndarray
     :param thereshold: threshold in microseconds. suggested 50,000 for 30fps, 
                        12,500 for 90fps
-    :type: float
+:type: float
 
     :return differences between timestamps; dt
     :type: numpy.ndarray

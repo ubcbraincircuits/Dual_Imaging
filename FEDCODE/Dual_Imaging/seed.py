@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy
 
 
 class Bregma:
@@ -140,7 +141,7 @@ def generate_scaled_seeds(seeds, bregma, ppmm, direction=None):
     seed_list = []
     for seed in seeds:
         if type(seed) in (tuple, list):
-            seed_list.append(Seed(*seed))
+            seed_list.append(Seed(*seed))  # unpacking the collection
         elif isinstance(seed, Seed):
             seed_list.append(seed)
         else:
@@ -184,3 +185,139 @@ def generate_scaled_seeds(seeds, bregma, ppmm, direction=None):
             scaled_seeds.append(
                 ScaledSeed(seed.name + "-L", int(bregma.col - ppmm * seed.x), int(bregma.row - ppmm * seed.y), bregma))
     return scaled_seeds
+
+
+def _seed_pixel_box(
+        row,
+        col,
+        radius,
+        height,
+        width
+):
+    top = row - radius
+    bottom = row + radius
+    left = col - radius
+    right = col + radius
+
+    if top < 0:
+        top = 0
+    if bottom > height:
+        bottom = height
+    if left < 0:
+        left = 0
+    if right > width:
+        right = width
+
+    return top, bottom+1, left, right+1
+
+
+def generate_correlation_matrix(
+        l_mouse_frames,
+        r_mouse_frames,
+        l_seeds,
+        r_seeds,
+        title,
+        filename=None,
+        radius=5,
+        interpolation="nearest",
+        cmap="viridis",
+        figsize=(10, 11)
+):
+    """
+    Generate correlation matrix and plot of correlation matrix for dual imaging experiment.
+    Also generate visualisation of bregma location and seed pixel regions.
+
+    :param l_mouse_frames: left mouse brain imaging frames
+    :type: numpy.ndarray
+    :param r_mouse_frames: right mouse brain imaging frames
+    :type: numpy.ndarray
+    :param l_seeds: collection of left mouse ScaledSeeds
+    :type: list/tuple/numpy.ndarray
+    :param r_seeds: collection of right mouse ScaledSeeds
+    :type: list/tuple/numpy.ndarray
+    :param title: chart title for correlation matrix
+    :type: str
+    :param filename: if files need saving, filenames to ascribe to plots and correlation matrix
+    :type: str
+    :param radius: default 5. number of pixels in either side of the seed pixel used to calculate the temporal mean
+    :type: int
+    :param interpolation: default `nearest`. one of `nearest, `linear`, `cubic`, interpolation type to use for correlation matrix chart
+    :type: str
+    :param cmap: default `viridis`. matplotlib colormap.
+    :type: str
+    :param figsize: default (10,11). size of correlation matrix plot in inches.
+    :type: tuple
+    """
+    radius = int(radius)
+    num_seeds = numpy.size(l_seeds)+numpy.size(r_seeds)
+    seed_signals = numpy.zeros(
+        (num_seeds, l_mouse_frames.shape[0])
+    )  # initialise matrix used to calculate correlation coefficient
+    labels, positions = [], []  # for labelling correlation coefficient matrix
+
+    # to display bregma and seed pixel regions
+    l_first_frame = l_mouse_frames[0]
+    r_first_frame = r_mouse_frames[0]
+
+    l_bregma, r_bregma = l_seeds[0].bregma, r_seeds[0].bregma
+    l_first_frame[l_bregma.row, l_bregma.col] = 255
+    r_first_frame[r_bregma.row, r_bregma.col] = 255
+
+    height, width = l_first_frame.shape
+    # for each seed, find the mean of the signal within specified radius of seed pixel
+    for i, seed in enumerate(l_seeds):
+        labels.append(seed.name+"-L")
+        top, bottom, left, right = _seed_pixel_box(
+            seed.row,
+            seed.col,
+            radius,
+            height,
+            width
+        )
+        seed.signal = numpy.mean(
+            numpy.mean(l_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
+        )
+        seed_signals[i] = seed.signal
+        l_first_frame[top:bottom, left:right] = 255
+        positions.append((seed.row, seed.col))
+
+    for i, seed in enumerate(l_seeds, start=i+1):  # continue looping through seed_signals
+        labels.append(seed.name+"-R")
+        top, bottom, left, right = _seed_pixel_box(
+            seed.row,
+            seed.col,
+            radius,
+            height,
+            width
+        )
+        seed.signal = numpy.mean(
+            numpy.mean(r_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
+        )
+        seed_signals[i] = seed.signal
+        r_first_frame[top:bottom, left:right] = 255
+        positions.append((seed.row, seed.col))
+
+    correlation_matrix = numpy.corrcoef(seed_signals)
+
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(correlation_matrix, interpolation=interpolation, vmin=0, vmax=1, cmap=cmap)
+    fig.colorbar(cax, fraction=0.046, pad=0.04)
+    ax.set_title(title + "\n", y=1.15)
+    ax.set_xticks([i for i in range(num_seeds)])
+    ax.set_yticks([i for i in range(num_seeds)])
+    ax.set_xticklabels(labels, rotation='vertical')
+    ax.set_yticklabels(labels)
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111)
+    ax2.imshow(l_first_frame, cmap='gray')
+    ax.set_title('Left brain seed pixel regions and bregma')
+    fig3 = plt.figure()
+    ax3 = fig3.add_subplot(111)
+    ax3.imshow(r_first_frame, cmap='gray')
+    ax.set_title('Right brain seed pixel regions and bregma')
+
+    if type(filename) is str:
+        print("Saving correlation matrix")
+        fig.savefig(filename + ".svg")
+        numpy.save(filename + ".npy", correlation_matrix)
