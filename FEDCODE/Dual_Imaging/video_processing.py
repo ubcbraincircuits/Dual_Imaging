@@ -46,13 +46,13 @@ def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8", nu
            raise Exception('Invalid input file or arguments')
        raw_frames = numpy.reshape(raw_frames, (time_dim, height, width, 3))
 
-       channels = {'red': 0, 'green': 1, 'blue': 2}.get(channel)
-       if channels is None:
+       channel = {'red': 0, 'green': 1, 'blue': 2}.get(channel)
+       if channel is None:
            #return all frames
            return raw_frames
        else:
            #return a particular channel
-           return raw_frames[..., channels[channel]]
+           return raw_frames[..., channel]
    else:
        #num_channels is 1
        with open(filename, "rb") as file:
