@@ -179,30 +179,30 @@ class DroppedFrames:
         del self.first_frame
         del self.last_frame
         self.interpolated_frames = interpolated_frames
+        return self
 
 
-def insert_interpolated_frames(frames, list_of_generated_frames):
+def insert_interpolated_frames(frames, list_of_interpolated_frames):
     """
     Insert interpolated frames into input array as a substitute for
     dropped frames
 
     :param frames: array of frames from RAW channel with dropped frames
     :type: numpy.ndarray
-    :param list_of_generated_frames: list of DroppedFrames objects
+    :param list_of_interpolated_frames: list of interpolated DroppedFrames objects
     :type: list
     :return: array of frames with dropped frames filled
     :type: numpy.ndarray
     """
     shifting_index = 0
-    for generated_frames in list_of_generated_frames:
-        interpolated_frames = generated_frames.interpolate()
+    for interpolated_frames in list_of_interpolated_frames:
         frames = numpy.insert(
             frames,
             interpolated_frames.location + shifting_index + 1,
             interpolated_frames.interpolated_frames,
             0
         )
-        shifting_index += generated_frames.number_of_dropped_frames
+        shifting_index += interpolated_frames.num_dropped_frames
     return frames
 
 
