@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy
-
+import sys
 
 class Bregma:
     """
     Define a mouse's bregma location from image
     """
-    def __init__(self, image=None, cmap='gray', from_image=True, column=None, row=None):
+    def __init__(self, image,  cmap='gray'):
         """
         Create the Bregma object. The last location
         clicked on will be considered the bregma.
@@ -17,41 +17,41 @@ class Bregma:
         :param cmap: matplotlib colormap. default is 'gray'
         :type: str
 
-        :from_image: flag used for from_coordinate construction
-        :type: bool
         """
-        if from_image:
-            if image is None:
-                raise TypeError('Parameter `image` expected but not found')
-            fig, ax = plt.subplots()
-            ax.matshow(image, cmap=cmap)
-            y_clicks, x_clicks = [], []
+        self.from_image = True
+        self.fig, self.ax = plt.subplots()
+        self.image = image
+        self.cmap = cmap
+        self.ax.matshow(self.image, cmap=self.cmap)
+        self.row, self.col = None, None
+        self.y_clicks, self.x_clicks = [], []
+        self.points = None
+        self.cid = self.fig.canvas.mpl_connect('button_press_event', self)
 
-            def onclick(event):
-                y_clicks.append(int(event.ydata))
-                x_clicks.append(int(event.xdata))
-
-            fig.canvas.mpl_connect('button_press_event', onclick)
-            if len(y_clicks) == 0:
-                print('No Bregma Selected')
-                del self
-                return
-            else:
-                self.col, self.row = y_clicks[-1], x_clicks[-1]
-
-        else:
-            if column is None and row is None:
-                raise TypeError('Parameters `column` and `row` expected bt not found')
-            else:
-                self.col, self.row = int(column), int(row)
-
-        print(self)
+    def __call__(self, event):
+        self.col, self.row = int(event.xdata), int(event.ydata)
+        sys.stdout.write("\r")
+        sys.stdout.write(self.__repr__())
+        sys.stdout.flush()
 
     def __repr__(self):
-        return f"Bregma Location:\nColumn {self.col}\nRow {self.row}"
+        if self.row is None:
+            return "No Bregma Selected"
+        return f"Bregma Location: Column {self.col} Row {self.row}"
 
     def __str__(self):
         return self.__repr__()
+
+    def show(self, cmap='gray', bregma_point='r.'):
+        if self.row is None:
+            print(self)
+            return
+        if self.from_image:
+            fig, ax = plt.subplots()
+            ax.matshow(self.image, cmap=cmap)
+            ax.plot(self.col, self.row, bregma_point)
+        else:
+            print("Bregma not selected from image")
 
     @classmethod
     def from_coordinates(cls, column, row):
@@ -256,9 +256,8 @@ def generate_correlation_matrix(
     labels, positions = [], []  # for labelling correlation coefficient matrix
 
     # to display bregma and seed pixel regions
-    l_first_frame = l_mouse_frames[0]
-    r_first_frame = r_mouse_frames[0]
-
+    l_first_frame = numpy.copy(l_mouse_frames[0])
+    r_first_frame = numpy.copy(r_mouse_frames[0])
     l_bregma, r_bregma = l_seeds[0].bregma, r_seeds[0].bregma
     l_first_frame[l_bregma.row, l_bregma.col] = 255
     r_first_frame[r_bregma.row, r_bregma.col] = 255
@@ -274,14 +273,12 @@ def generate_correlation_matrix(
             height,
             width
         )
-        seed.signal = numpy.mean(
-            numpy.mean(l_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
-        )
+        seed.signal = numpy.mean(l_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
         seed_signals[i] = seed.signal
         l_first_frame[top:bottom, left:right] = 255
         positions.append((seed.row, seed.col))
 
-    for i, seed in enumerate(l_seeds, start=i+1):  # continue looping through seed_signals
+    for i, seed in enumerate(r_seeds, start=i+1):  # continue looping through seed_signals
         labels.append(seed.name+"-R")
         top, bottom, left, right = _seed_pixel_box(
             seed.row,
@@ -290,32 +287,30 @@ def generate_correlation_matrix(
             height,
             width
         )
-        seed.signal = numpy.mean(
-            numpy.mean(r_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
-        )
+        seed.signal = numpy.mean(r_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
         seed_signals[i] = seed.signal
         r_first_frame[top:bottom, left:right] = 255
         positions.append((seed.row, seed.col))
-
     correlation_matrix = numpy.corrcoef(seed_signals)
-
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
-    cax = ax.matshow(correlation_matrix, interpolation=interpolation, vmin=0, vmax=1, cmap=cmap)
+    cax = ax.matshow(correlation_matrix, interpolation=interpolation, cmap=cmap)
     fig.colorbar(cax, fraction=0.046, pad=0.04)
     ax.set_title(title + "\n", y=1.15)
     ax.set_xticks([i for i in range(num_seeds)])
     ax.set_yticks([i for i in range(num_seeds)])
     ax.set_xticklabels(labels, rotation='vertical')
     ax.set_yticklabels(labels)
+
     fig2 = plt.figure()
     ax2 = fig2.add_subplot(111)
-    ax2.imshow(l_first_frame, cmap='gray')
-    ax.set_title('Left brain seed pixel regions and bregma')
+    ax2.imshow(l_first_frame, cmap='Reds')
+    ax2.set_title('Left brain seed pixel regions and bregma')
     fig3 = plt.figure()
     ax3 = fig3.add_subplot(111)
-    ax3.imshow(r_first_frame, cmap='gray')
-    ax.set_title('Right brain seed pixel regions and bregma')
+    ax3.imshow(r_first_frame, cmap='Reds')
+    ax3.set_title('Right brain seed pixel regions and bregma')
+    return seed_signals
 
     if type(filename) is str:
         print("Saving correlation matrix")
