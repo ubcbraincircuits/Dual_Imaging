@@ -2,11 +2,13 @@ import matplotlib.pyplot as plt
 import numpy
 import sys
 
+
 class Bregma:
     """
     Define a mouse's bregma location from image
     """
-    def __init__(self, image,  cmap='gray'):
+
+    def __init__(self, image, cmap="gray"):
         """
         Create the Bregma object. The last location
         clicked on will be considered the bregma.
@@ -26,10 +28,15 @@ class Bregma:
         self.row, self.col = None, None
         self.y_clicks, self.x_clicks = [], []
         self.points = None
-        self.cid = self.fig.canvas.mpl_connect('button_press_event', self)
+        self.cid = self.fig.canvas.mpl_connect(
+            "button_press_event", self
+        )
 
     def __call__(self, event):
-        self.col, self.row = int(event.xdata), int(event.ydata)
+        self.col, self.row = (
+            int(event.xdata),
+            int(event.ydata),
+        )
         sys.stdout.write("\r")
         sys.stdout.write(self.__repr__())
         sys.stdout.flush()
@@ -42,7 +49,7 @@ class Bregma:
     def __str__(self):
         return self.__repr__()
 
-    def show(self, cmap='gray', bregma_point='r.'):
+    def show(self, cmap="gray", bregma_point="r."):
         if self.row is None:
             print(self)
             return
@@ -66,13 +73,21 @@ class Bregma:
         :return: instance of Bregma
         """
         if type(column) not in (int, float):
-            raise TypeError('Argument `column` must be a positive integer or float')
+            raise TypeError(
+                "Argument `column` must be a positive integer or float"
+            )
         if column < 0:
-            raise ValueError('Argument `column` must be a positive integer or float')
+            raise ValueError(
+                "Argument `column` must be a positive integer or float"
+            )
         if type(row) not in (int, float):
-            raise TypeError('Argument `row` must be a positive integer or float')
+            raise TypeError(
+                "Argument `row` must be a positive integer or float"
+            )
         if row < 0:
-            raise ValueError('Argument `row` must be a positive integer or float')
+            raise ValueError(
+                "Argument `row` must be a positive integer or float"
+            )
         return cls(column=column, row=row, from_image=False)
 
 
@@ -80,6 +95,7 @@ class Seed:
     """
     Seed pixel
     """
+
     def __init__(self, name, y, x):
         """
         :param name: Name of seed pixel
@@ -93,23 +109,30 @@ class Seed:
             self.name = name
         else:
             del self
-            raise TypeError("Argument `name` should be a string")
+            raise TypeError(
+                "Argument `name` should be a string"
+            )
         if type(y) in (int, float):
             self.y = y
         else:
             del self
-            raise TypeError("Argument `y` must be a float or integer")
+            raise TypeError(
+                "Argument `y` must be a float or integer"
+            )
         if type(x) in (int, float):
             self.x = x
         else:
             del self
-            raise TypeError("Argument `x` must be a float or integer")
+            raise TypeError(
+                "Argument `x` must be a float or integer"
+            )
 
 
 class ScaledSeed:
     """
     Scaled seed pixel
     """
+
     def __init__(self, name, row, col, bregma):
         self.name = name
         self.row = row
@@ -119,7 +142,9 @@ class ScaledSeed:
         self.corr_map = None
 
 
-def generate_scaled_seeds(seeds, bregma, ppmm, direction=None):
+def generate_scaled_seeds(
+    seeds, bregma, ppmm, direction=None
+):
     """
     Generate Scaled Seed pixels
 
@@ -136,64 +161,113 @@ def generate_scaled_seeds(seeds, bregma, ppmm, direction=None):
     :type: list
     """
     if type(seeds) not in (tuple, list):
-        raise AttributeError('Argument `seed` must be a list or tuple')
-
+        raise AttributeError(
+            "Argument `seed` must be a list or tuple"
+        )
     seed_list = []
     for seed in seeds:
         if type(seed) in (tuple, list):
-            seed_list.append(Seed(*seed))  # unpacking the collection
+            seed_list.append(
+                Seed(*seed)
+            )  # unpacking the collection
         elif isinstance(seed, Seed):
             seed_list.append(seed)
         else:
-            raise TypeError(f"Invalid seed {seed}. Seed must be a valid tuple/list or instance of Seed.")
-
+            raise TypeError(
+                f"Invalid seed {seed}. Seed must be a valid tuple/list or instance of Seed."
+            )
     if not isinstance(bregma, Bregma):
-        raise TypeError("Argument `bregma` must be an instance of Bregma.")
-
+        raise TypeError(
+            "Argument `bregma` must be an instance of Bregma."
+        )
     if type(ppmm) not in (int, float):
-        raise TypeError('Argument `ppmm` must be an integer or a float')
-
-    directions = ('u', 'd', 'l', 'r', None)
+        raise TypeError(
+            "Argument `ppmm` must be an integer or a float"
+        )
+    directions = ("u", "d", "l", "r", None)
     if direction not in directions:
-        raise AttributeError(f'Keyword `direction` must be one of {directions}')
+        raise AttributeError(
+            f"Keyword `direction` must be one of {directions}"
+        )
     else:
-        print(f'Direction chosen: {direction}')
-
+        print(f"Direction chosen: {direction}")
     scaled_seeds = []
-    if direction in ('u', None):
+    if direction in ("u", None):
         for seed in seed_list:
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-L", int(bregma.row - ppmm * seed.y), int(bregma.col - ppmm * seed.x), bregma))
+                ScaledSeed(
+                    seed.name + "-L",
+                    int(bregma.row - ppmm * seed.y),
+                    int(bregma.col - ppmm * seed.x),
+                    bregma,
+                )
+            )
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-R", int(bregma.row - ppmm * seed.y), int(bregma.col + ppmm * seed.x), bregma))
-    elif direction is 'd':
+                ScaledSeed(
+                    seed.name + "-R",
+                    int(bregma.row - ppmm * seed.y),
+                    int(bregma.col + ppmm * seed.x),
+                    bregma,
+                )
+            )
+    elif direction is "d":
         for seed in seed_list:
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-R", int(bregma.row - ppmm * seed.y), int(bregma.col + ppmm * seed.x), bregma))
+                ScaledSeed(
+                    seed.name + "-R",
+                    int(bregma.row - ppmm * seed.y),
+                    int(bregma.col + ppmm * seed.x),
+                    bregma,
+                )
+            )
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-L", int(bregma.row - ppmm * seed.y), int(bregma.col - ppmm * seed.x), bregma))
-    elif direction is 'r':
+                ScaledSeed(
+                    seed.name + "-L",
+                    int(bregma.row - ppmm * seed.y),
+                    int(bregma.col - ppmm * seed.x),
+                    bregma,
+                )
+            )
+    elif direction is "r":
         for seed in seed_list:
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-R", int(bregma.row - ppmm * seed.x), int(bregma.col + ppmm * seed.y), bregma))
+                ScaledSeed(
+                    seed.name + "-R",
+                    int(bregma.row - ppmm * seed.x),
+                    int(bregma.col + ppmm * seed.y),
+                    bregma,
+                )
+            )
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-L", int(bregma.row + ppmm * seed.x), int(bregma.col + ppmm * seed.y), bregma))
+                ScaledSeed(
+                    seed.name + "-L",
+                    int(bregma.row + ppmm * seed.x),
+                    int(bregma.col + ppmm * seed.y),
+                    bregma,
+                )
+            )
     else:  # direction is 'l'
         for seed in seed_list:
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-R", int(bregma.col + ppmm * seed.x), int(bregma.row - ppmm * seed.y), bregma))
+                ScaledSeed(
+                    seed.name + "-R",
+                    int(bregma.col + ppmm * seed.x),
+                    int(bregma.row - ppmm * seed.y),
+                    bregma,
+                )
+            )
             scaled_seeds.append(
-                ScaledSeed(seed.name + "-L", int(bregma.col - ppmm * seed.x), int(bregma.row - ppmm * seed.y), bregma))
+                ScaledSeed(
+                    seed.name + "-L",
+                    int(bregma.col - ppmm * seed.x),
+                    int(bregma.row - ppmm * seed.y),
+                    bregma,
+                )
+            )
     return scaled_seeds
 
 
-def _seed_pixel_box(
-        row,
-        col,
-        radius,
-        height,
-        width
-):
+def _seed_pixel_box(row, col, radius, height, width):
     top = row - radius
     bottom = row + radius
     left = col - radius
@@ -207,21 +281,20 @@ def _seed_pixel_box(
         left = 0
     if right > width:
         right = width
-
-    return top, bottom+1, left, right+1
+    return top, bottom + 1, left, right + 1
 
 
 def generate_correlation_matrix(
-        l_mouse_frames,
-        r_mouse_frames,
-        l_seeds,
-        r_seeds,
-        title,
-        filename=None,
-        radius=5,
-        interpolation="nearest",
-        cmap="viridis",
-        figsize=(10, 11)
+    l_mouse_frames,
+    r_mouse_frames,
+    l_seeds,
+    r_seeds,
+    title,
+    filename=None,
+    radius=5,
+    interpolation="nearest",
+    cmap="viridis",
+    figsize=(10, 11),
 ):
     """
     Generate correlation matrix and plot of correlation matrix for dual imaging experiment.
@@ -249,67 +322,80 @@ def generate_correlation_matrix(
     :type: tuple
     """
     radius = int(radius)
-    num_seeds = numpy.size(l_seeds)+numpy.size(r_seeds)
+    num_seeds = numpy.size(l_seeds) + numpy.size(r_seeds)
     seed_signals = numpy.zeros(
         (num_seeds, l_mouse_frames.shape[0])
     )  # initialise matrix used to calculate correlation coefficient
-    labels, positions = [], []  # for labelling correlation coefficient matrix
+    labels, positions = (
+        [],
+        [],
+    )  # for labelling correlation coefficient matrix
 
     # to display bregma and seed pixel regions
     l_first_frame = numpy.copy(l_mouse_frames[0])
     r_first_frame = numpy.copy(r_mouse_frames[0])
-    l_bregma, r_bregma = l_seeds[0].bregma, r_seeds[0].bregma
+    l_bregma, r_bregma = (
+        l_seeds[0].bregma,
+        r_seeds[0].bregma,
+    )
     l_first_frame[l_bregma.row, l_bregma.col] = 255
     r_first_frame[r_bregma.row, r_bregma.col] = 255
 
     height, width = l_first_frame.shape
     # for each seed, find the mean of the signal within specified radius of seed pixel
     for i, seed in enumerate(l_seeds):
-        labels.append(seed.name+"-L")
+        labels.append(seed.name + "-L")
         top, bottom, left, right = _seed_pixel_box(
-            seed.row,
-            seed.col,
-            radius,
-            height,
-            width
+            seed.row, seed.col, radius, height, width
         )
-        seed.signal = numpy.mean(l_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
+        seed.signal = numpy.mean(
+            l_mouse_frames[:, top:bottom, left:right],
+            axis=(1, 2),
+        )
         seed_signals[i] = seed.signal
         l_first_frame[top:bottom, left:right] = 255
         positions.append((seed.row, seed.col))
-
-    for i, seed in enumerate(r_seeds, start=i+1):  # continue looping through seed_signals
-        labels.append(seed.name+"-R")
+    for i, seed in enumerate(
+        r_seeds, start=i + 1
+    ):  # continue looping through seed_signals
+        labels.append(seed.name + "-R")
         top, bottom, left, right = _seed_pixel_box(
-            seed.row,
-            seed.col,
-            radius,
-            height,
-            width
+            seed.row, seed.col, radius, height, width
         )
-        seed.signal = numpy.mean(r_mouse_frames[:, top:bottom, left:right], axis=(1, 2))
+        seed.signal = numpy.mean(
+            r_mouse_frames[:, top:bottom, left:right],
+            axis=(1, 2),
+        )
         seed_signals[i] = seed.signal
         r_first_frame[top:bottom, left:right] = 255
         positions.append((seed.row, seed.col))
     correlation_matrix = numpy.corrcoef(seed_signals)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
-    cax = ax.matshow(correlation_matrix, interpolation=interpolation, cmap=cmap)
+    cax = ax.matshow(
+        correlation_matrix,
+        interpolation=interpolation,
+        cmap=cmap,
+    )
     fig.colorbar(cax, fraction=0.046, pad=0.04)
     ax.set_title(title + "\n", y=1.15)
     ax.set_xticks([i for i in range(num_seeds)])
     ax.set_yticks([i for i in range(num_seeds)])
-    ax.set_xticklabels(labels, rotation='vertical')
+    ax.set_xticklabels(labels, rotation="vertical")
     ax.set_yticklabels(labels)
 
     fig2 = plt.figure()
     ax2 = fig2.add_subplot(111)
-    ax2.imshow(l_first_frame, cmap='Reds')
-    ax2.set_title('Left brain seed pixel regions and bregma')
+    ax2.imshow(l_first_frame, cmap="Reds")
+    ax2.set_title(
+        "Left brain seed pixel regions and bregma"
+    )
     fig3 = plt.figure()
     ax3 = fig3.add_subplot(111)
-    ax3.imshow(r_first_frame, cmap='Reds')
-    ax3.set_title('Right brain seed pixel regions and bregma')
+    ax3.imshow(r_first_frame, cmap="Reds")
+    ax3.set_title(
+        "Right brain seed pixel regions and bregma"
+    )
     return seed_signals
 
     if type(filename) is str:
