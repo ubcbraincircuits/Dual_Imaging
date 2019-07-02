@@ -5,8 +5,15 @@ from scipy import signal
 from sklearn.utils import gen_even_slices
 
 
-def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8", num_channels=3):
-   """
+def extract_RAW_frames(
+    filename,
+    width,
+    height,
+    channel="all",
+    dtype="uint8",
+    num_channels=3,
+):
+    """
    Extract channels from .RAW file containing image data
 
    :param filename: name of .RAW file containing image data
@@ -25,44 +32,64 @@ def extract_RAW_frames(filename, width, height, channel="all", dtype="uint8", nu
    :return: channel(s) extracted from .RAW file
    :type: numpy.ndarray
    """
-   if num_channels not in (1,3):
-       raise AttributeError("Keyword 'num_channels' must be one of (1,3)")
-   try:
-       datatype = getattr(numpy, dtype)
-   except AttributeError:
-       raise AttributeError(f'dtype numpy.{dtype} does not exist')
-   if num_channels is 3:
-       if channel not in ('all', 'red', 'blue', 'green'):
-           raise AttributeError(
-           "Keyword 'channel' must be one of: ('all', 'red', 'blue', 'green')"
-           )
+    if num_channels not in (1, 3):
+        raise AttributeError(
+            "Keyword 'num_channels' must be one of (1,3)"
+        )
+    try:
+        datatype = getattr(numpy, dtype)
+    except AttributeError:
+        raise AttributeError(
+            f"dtype numpy.{dtype} does not exist"
+        )
+    if num_channels is 3:
+        if channel not in ("all", "red", "blue", "green"):
+            raise AttributeError(
+                "Keyword 'channel' must be one of: ('all', 'red', 'blue', 'green')"
+            )
+        with open(filename, "rb") as file:
+            raw_frames = numpy.fromfile(
+                file, dtype=datatype
+            )
+        time_dim_float = raw_frames.shape[0] / (
+            width * height * 3
+        )
+        time_dim = int(time_dim_float)
+        if time_dim != time_dim_float:
+            raise Exception(
+                "Invalid input file or arguments"
+            )
+        raw_frames = numpy.reshape(
+            raw_frames, (time_dim, height, width, 3)
+        )
 
-       with open(filename, "rb") as file:
-           raw_frames = numpy.fromfile(file, dtype=datatype)
-
-       time_dim_float = raw_frames.shape[0] / (width*height*3)
-       time_dim = int(time_dim_float)
-       if time_dim != time_dim_float:
-           raise Exception('Invalid input file or arguments')
-       raw_frames = numpy.reshape(raw_frames, (time_dim, height, width, 3))
-
-       channel = {'red': 0, 'green': 1, 'blue': 2}.get(channel)
-       if channel is None:
-           #return all frames
-           return raw_frames
-       else:
-           #return a particular channel
-           return raw_frames[..., channel]
-   else:
-       #num_channels is 1
-       with open(filename, "rb") as file:
-           raw_frames = numpy.fromfile(file, dtype=datatype)
-           time_dim_float = raw_frames.shape[0] / (width*height)
-           time_dim = int(time_dim_float)
-           if time_dim != time_dim_float:
-               raise Exception('Invalid input file or arguments')
-           raw_frames = numpy.reshape(raw_frames, (time_dim, height, width))
-           return raw_frames
+        channel = {"red": 0, "green": 1, "blue": 2}.get(
+            channel
+        )
+        if channel is None:
+            # return all frames
+            return raw_frames
+        else:
+            # return a particular channel
+            return raw_frames[..., channel]
+    else:
+        # num_channels is 1
+        with open(filename, "rb") as file:
+            raw_frames = numpy.fromfile(
+                file, dtype=datatype
+            )
+            time_dim_float = raw_frames.shape[0] / (
+                width * height
+            )
+            time_dim = int(time_dim_float)
+            if time_dim != time_dim_float:
+                raise Exception(
+                    "Invalid input file or arguments"
+                )
+            raw_frames = numpy.reshape(
+                raw_frames, (time_dim, height, width)
+            )
+            return raw_frames
 
 
 def clean_raw_timestamps(filename):
@@ -75,8 +102,10 @@ def clean_raw_timestamps(filename):
     :return: cleaned timestamp array
     :type: numpy.ndarray
     """
-    with open(filename, 'rb') as file:
-        raw_timestamps = numpy.fromfile(file, dtype=numpy.float32)
+    with open(filename, "rb") as file:
+        raw_timestamps = numpy.fromfile(
+            file, dtype=numpy.float32
+        )
     raw_timestamps[0] = 1
     return raw_timestamps[numpy.where(raw_timestamps > 0)]
 
@@ -88,7 +117,7 @@ def get_locations_of_dropped_frames(timestamps, threshold):
 
     :param timestamps: 1-D numpy array containing timestamps
     :type: numpy.ndarray
-    :param thereshold: threshold in microseconds. suggested 50,000 for 30fps, 
+    :param thereshold: threshold in microseconds. suggested 50,000 for 30fps,
                        12,500 for 90fps
 :type: float
 
@@ -98,14 +127,24 @@ def get_locations_of_dropped_frames(timestamps, threshold):
     :type: numpy.ndarray
     """
     differences = numpy.diff(timestamps, 1)
-    print("Mean filtered frame difference: ", numpy.mean(
-        differences[numpy.where(differences <= threshold)]
-    ))
+    print(
+        "Mean filtered frame difference: ",
+        numpy.mean(
+            differences[
+                numpy.where(differences <= threshold)
+            ]
+        ),
+    )
 
-    return differences, numpy.where(differences > threshold)[0]
+    return (
+        differences,
+        numpy.where(differences > threshold)[0],
+    )
 
 
-def generate_frames(frames, differences, locations, true_frame_rate):
+def generate_frames(
+    frames, differences, locations, true_frame_rate
+):
     """
     Generator function for producing args to initialise list of DroppedFrames
 
@@ -129,11 +168,24 @@ def generate_frames(frames, differences, locations, true_frame_rate):
         :type: numpy.ndarray
     """
     for location in locations:
-        number_of_dropped_frames = int(
-            numpy.round(differences[location] / (1.e6/true_frame_rate))
-        ) - 1
-        first_frame, last_frame = frames[location:location+2]
-        yield (first_frame, last_frame, number_of_dropped_frames, location)
+        number_of_dropped_frames = (
+            int(
+                numpy.round(
+                    differences[location]
+                    / (1.0e6 / true_frame_rate)
+                )
+            )
+            - 1
+        )
+        first_frame, last_frame = frames[
+            location : location + 2
+        ]
+        yield (
+            first_frame,
+            last_frame,
+            number_of_dropped_frames,
+            location,
+        )
 
 
 class DroppedFrames:
@@ -141,8 +193,14 @@ class DroppedFrames:
     Used to fill in dropped frames by interpolating between closest
     available data pairs
     """
-    
-    def __init__(self, first_frame, last_frame, num_dropped_frames, location):
+
+    def __init__(
+        self,
+        first_frame,
+        last_frame,
+        num_dropped_frames,
+        location,
+    ):
         """
         Create the DroppedFrames object
 
@@ -168,21 +226,31 @@ class DroppedFrames:
         """
         Produce missing frames by interpolating between first frame and last frame
         """
-        diff_per_frame = (self.last_frame-self.first_frame) / (self.num_dropped_frames+1)
+        diff_per_frame = (
+            self.last_frame - self.first_frame
+        ) / (self.num_dropped_frames + 1)
 
         interpolated_frames = numpy.empty(
-            (self.num_dropped_frames, self.height, self.width),
-            dtype=numpy.uint8
+            (
+                self.num_dropped_frames,
+                self.height,
+                self.width,
+            ),
+            dtype=numpy.uint8,
         )
         for frame_index in range(self.num_dropped_frames):
-            interpolated_frames[frame_index] = (frame_index+1)*diff_per_frame+self.first_frame
+            interpolated_frames[frame_index] = (
+                frame_index + 1
+            ) * diff_per_frame + self.first_frame
         del self.first_frame
         del self.last_frame
         self.interpolated_frames = interpolated_frames
         return self
 
 
-def insert_interpolated_frames(frames, list_of_interpolated_frames):
+def insert_interpolated_frames(
+    frames, list_of_interpolated_frames
+):
     """
     Insert interpolated frames into input array as a substitute for
     dropped frames
@@ -198,11 +266,15 @@ def insert_interpolated_frames(frames, list_of_interpolated_frames):
     for interpolated_frames in list_of_interpolated_frames:
         frames = numpy.insert(
             frames,
-            interpolated_frames.location + shifting_index + 1,
+            interpolated_frames.location
+            + shifting_index
+            + 1,
             interpolated_frames.interpolated_frames,
-            0
+            0,
         )
-        shifting_index += interpolated_frames.num_dropped_frames
+        shifting_index += (
+            interpolated_frames.num_dropped_frames
+        )
     return frames
 
 
@@ -228,19 +300,21 @@ class DarkFramesSlice:
             if mean > threshold:
                 start = i
                 break
-
-        reversed_temporal_means = numpy.flip(temporal_means, axis=0)
+        reversed_temporal_means = numpy.flip(
+            temporal_means, axis=0
+        )
         del temporal_means
 
         for i, mean in enumerate(reversed_temporal_means):
             if mean < threshold:
-                end = end-i
+                end = end - i
                 break
-
         return slice(start, end)
 
     @staticmethod
-    def gradient_method(behaviour_frames, sigma=15, spacetime=False):
+    def gradient_method(
+        behaviour_frames, sigma=15, spacetime=False
+    ):
         """
 
         :param behaviour_frames:
@@ -251,7 +325,9 @@ class DarkFramesSlice:
         if spacetime:
             means = numpy.mean(behaviour_frames, axis=1)
         else:
-            means = numpy.mean(behaviour_frames, axis=(1, 2))
+            means = numpy.mean(
+                behaviour_frames, axis=(1, 2)
+            )
         grads = numpy.gradient(means)
         mean = numpy.mean(grads)
         std = numpy.std(grads)
@@ -267,7 +343,6 @@ class DarkFramesSlice:
             if abs(grad) < threshold:
                 end = end - i
                 break
-
         return slice(start, end)
 
 
@@ -287,15 +362,26 @@ def calculate_df_f0(frames):
     """
     frames = frames.astype(numpy.float32)
     baseline = numpy.mean(frames, axis=0)
-    df_f0 = numpy.divide(numpy.subtract(frames, baseline), baseline)
+    df_f0 = numpy.divide(
+        numpy.subtract(frames, baseline), baseline
+    )
     del frames, baseline
-    df_f0[numpy.where(numpy.isnan(df_f0))] = -1  # Make the nans black.
+    df_f0[
+        numpy.where(numpy.isnan(df_f0))
+    ] = -1  # Make the nans black.
 
     return df_f0, numpy.var(df_f0, axis=0)
 
 
 class Filter:
-    def __init__(self, low_freq_cutoff, high_freq_cutoff, frame_rate, order=4, rp=0.1):
+    def __init__(
+        self,
+        low_freq_cutoff,
+        high_freq_cutoff,
+        frame_rate,
+        order=4,
+        rp=0.1,
+    ):
         """
         Create Bandpass Filter object with frequency cutoff attributes
 
@@ -315,16 +401,25 @@ class Filter:
         stopband = high_freq_cutoff / nyq
 
         numerator, denominator = signal.cheby1(
-            order, rp, Wn=[passband, stopband], btype='bandpass', analog=False
+            order,
+            rp,
+            Wn=[passband, stopband],
+            btype="bandpass",
+            analog=False,
         )
-        self.numerator, self.denominator = numerator, denominator
+        self.numerator, self.denominator = (
+            numerator,
+            denominator,
+        )
 
     @staticmethod
     def lfilter(numerator, denominator, data, axis=0):
         """
         Wrapper on signal.lfilter to constrain axis to time-axis
         """
-        return signal.lfilter(numerator, denominator, data, axis)
+        return signal.lfilter(
+            numerator, denominator, data, axis
+        )
 
     def filter(self, frames, n_jobs=None):
         """
@@ -339,18 +434,25 @@ class Filter:
         :type: numpy.ndarray
         """
         n_frames, height, width = frames.shape
-        frames = frames.reshape(n_frames, height*width)
+        frames = frames.reshape(n_frames, height * width)
 
         if n_jobs is None:
             n_jobs = cpu_count()
-
         bandpass_filter = delayed(Filter.lfilter)
         result = Parallel(n_jobs=n_jobs, verbose=0)(
-            bandpass_filter(frames[:, s], self.numerator, self.denominator)
-            for s in gen_even_slices(frames.shape[1], n_jobs)
+            bandpass_filter(
+                frames[:, s],
+                self.numerator,
+                self.denominator,
+            )
+            for s in gen_even_slices(
+                frames.shape[1], n_jobs
+            )
         )
 
-        return numpy.hstack(result).reshape(n_frames, height, width)
+        return numpy.hstack(result).reshape(
+            n_frames, height, width
+        )
 
 
 def correct_channel_a_by_b(a, b):
@@ -365,7 +467,7 @@ def correct_channel_a_by_b(a, b):
 
     :return: a/(1+b)
     """
-    return a/(1+b)
+    return a / (1 + b)
 
 
 def load_frames(filename, color):
@@ -380,11 +482,11 @@ def load_frames(filename, color):
     :return: video frames
     :type: numpy.ndarray
     """
-    channel = {'red': 0, 'green': 1, 'blue': 2}.get(color)
+    channel = {"red": 0, "green": 1, "blue": 2}.get(color)
     if channel is None:
         raise AttributeError(
             "Argument 'color' must be one of ('red', 'green', 'blue', False)"
-            )
+        )
     first_frame = True
     cap = cv2.VideoCapture(filename)
     while cap.isOpened():
@@ -394,25 +496,33 @@ def load_frames(filename, color):
         if not color:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         else:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[..., channel]
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[
+                ..., channel
+            ]
         if first_frame:
             frames = numpy.expand_dims(frame, 0)
             first_frame = False
         else:
             frames = numpy.concatenate(
                 (frames, numpy.expand_dims(frame, 0)),
-                axis=0
+                axis=0,
             )
     return frames
 
 
-def video_synchronisation_indices(A_period, A_frames, B_period, B_frames):
+def video_synchronisation_indices(
+    A_period, A_frames, B_period, B_frames
+):
     if B_period < A_period:
-        raise ValueError("First video has lower frame rate than second video")
-
+        raise ValueError(
+            "First video has lower frame rate than second video"
+        )
     # Total length of the videos. The first frame comes in at t=0
     # so the adjustment has to be made when doing the calculation
-    A_total_time, B_total_time = A_period * (A_frames - 1), B_period * (B_frames - 1)
+    A_total_time, B_total_time = (
+        A_period * (A_frames - 1),
+        B_period * (B_frames - 1),
+    )
     t_max = min(A_total_time, B_total_time)
     A = numpy.arange(0, t_max, A_period)
     B = numpy.arange(0, t_max, B_period)
@@ -425,7 +535,8 @@ def video_synchronisation_indices(A_period, A_frames, B_period, B_frames):
         # period of B, we can use it
         # We also keep the corresponding index of B if B is shorter than A
         if minimum <= B_period:
-            A_indices.append(numpy.where(abs_difference == minimum)[0][0])
+            A_indices.append(
+                numpy.where(abs_difference == minimum)[0][0]
+            )
             B_indices.append(B_index)
-
     return A_indices, B_indices
