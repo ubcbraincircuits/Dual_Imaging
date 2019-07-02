@@ -148,7 +148,8 @@ def generate_scaled_seeds(
     """
     Generate Scaled Seed pixels
 
-    :param seeds: list or tuple containing instances of Seed or tuples/lists containing arguments to instantiate Seeds.
+    :param seeds: list or tuple containing instances of Seed or tuples/lists
+                  containing arguments to instantiate Seeds.
     :type: list or tuple
     :param bregma: instance of Bregma
     :type: Bregma
@@ -314,7 +315,8 @@ def generate_correlation_matrix(
     :type: str
     :param radius: default 5. number of pixels in either side of the seed pixel used to calculate the temporal mean
     :type: int
-    :param interpolation: default `nearest`. one of `nearest, `linear`, `cubic`, interpolation type to use for correlation matrix chart
+    :param interpolation: default `nearest`. one of `nearest, `linear`, `cubic`,
+                          interpolation type to use for correlation matrix chart
     :type: str
     :param cmap: default `viridis`. matplotlib colormap.
     :type: str
