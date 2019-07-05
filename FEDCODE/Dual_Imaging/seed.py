@@ -398,7 +398,7 @@ def generate_correlation_matrix(
     ax3.set_title(
         "Right brain seed pixel regions and bregma"
     )
-    return seed_signals
+    return seed_signals, correlation_matrix, fig
 
     if type(filename) is str:
         print("Saving correlation matrix")
