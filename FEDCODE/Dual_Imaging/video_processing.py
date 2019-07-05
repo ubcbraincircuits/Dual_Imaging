@@ -119,7 +119,7 @@ def get_locations_of_dropped_frames(timestamps, threshold):
     :type: numpy.ndarray
     :param thereshold: threshold in microseconds. suggested 50,000 for 30fps,
                        12,500 for 90fps
-:type: float
+    :type: float
 
     :return differences between timestamps; dt
     :type: numpy.ndarray
@@ -540,3 +540,64 @@ def video_synchronisation_indices(
             )
             B_indices.append(B_index)
     return A_indices, B_indices
+
+
+def downsample(array, new_shape):
+    """Rebin last two dimensions of 2D or 3D array arr to shape new_shape by averaging.
+       :param array: 2D or 3D, array-like
+       :type: numpy.ndrray
+       :param new_shape: tuple-like describing new shape of last two dimensions
+       :type: tuple-like
+    """
+    dims = array.shape
+    n_dims = len(dims)
+    new_n_dims = len(new_shape)
+    if new_n_dims != 2:
+        raise ValueError(
+            f"Argument `new_shape` should have len 2, len {new_n_dims} given instead"
+        )
+    if n_dims == 2:
+        shape = (
+            new_shape[0],
+            dims[0] // new_shape[0],
+            new_shape[1],
+            dims[1] // new_shape[1],
+        )
+        return numpy.mean(
+            array.reshape(shape), axis=(1, -1)
+        )
+    if n_dims == 3:
+        shape = (
+            dims[0],
+            new_shape[0],
+            dims[1] // new_shape[0],
+            new_shape[1],
+            dims[2] // new_shape[1],
+        )
+        return numpy.mean(
+            array.reshape(shape), axis=(2, -1)
+        )
+    else:
+        raise ValueError(
+            f"Argument `array` was expected to have 2 or 3 dimensions, {n_dims} given instead"
+        )
+
+
+def global_signal(frames):
+    """
+    Calculate: 1. 'mean' of `frames`
+               2. 'beta', the matrix product of the Moore-Penrose pseudo-inverse of 'mean', and `frames`
+               3. 'globalsignal', the matrix product of `mean` and `beta`
+
+    :param frames: array-like
+    :type: numpy.ndarray
+    :return: globalsignal, mean, beta
+    """
+    mean_g = numpy.mean(frames, axis=1)
+    g_plus = numpy.squeeze(numpy.linalg.pinv([mean_g]))
+    mean_g = numpy.expand_dims(mean_g, axis=1)
+    g_plus = numpy.expand_dims(g_plus, axis=0)
+    beta_g = numpy.matmul(g_plus, frames)
+    globalsignal = numpy.matmul(mean_g, beta_g)
+
+    return globalsignal, mean_g, beta_g
