@@ -16,7 +16,7 @@ class Data:
 
     def experiment(self, date, exp_num, listfiles=False):
         """
-        Returns the directory of the experiment if it exists, and if not,
+        Returns the directory of the experiment if it exists and if not,
         an exception is raised.
 
         :param date: the date the experiment was conducted in any format
@@ -187,7 +187,7 @@ class Output:
         :type: str
         :param dirname: name of the directory in which the file will be saved
         :type: str
-        :param fig: must be set to True if f_out is a figure
+        :param fig: must be set to True if f_out is a figure; the file is saved in npy format otherwise
         :type: bool
 
         :return: file name of result
@@ -219,7 +219,6 @@ class Output:
             # concatenate up to but not including the file type. 
             rm_type += fname[i]
         fname = rm_type + f'_{suffix}' + f'.{ftype}'
-        return fname
             
         path = Path(direc+fname)
 
@@ -227,9 +226,13 @@ class Output:
             if fig == True:
                 f_out.savefig(path)
                 print(f"Saved as {fname}")
+                return fname
             else:
-                np.save(path)
+                np.save(path, f_out)
                 print(f"Saved as {fname}")
+                return fname
+        else:
+            return fname 
 
 
 
