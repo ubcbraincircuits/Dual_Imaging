@@ -33,7 +33,7 @@ class Data:
         :return: all files in the experiment directory
         :type: list
         """
-        if type(date) is str:
+        if type(date) == str:
             d_format = parse(date)
             d = f"/{d_format.year}{d_format:%m}{d_format:%d}"
             date_path = Path(str(self.directory) + d) 
@@ -61,6 +61,7 @@ class Data:
         :type: str
         :param fname: one of 
         'timestamps', 
+        'subset interpolated',
         'interpolated', 
         'h264', 
         'combined', 
@@ -75,7 +76,15 @@ class Data:
         'left blue 0.01-3.0Hz', 
         'left green 0.01-3.0Hz', 
         'right blue 0.01-3.0Hz',
-        'right green 0.01-3.0Hz'
+        'right green 0.01-3.0Hz',
+        'left blue 0.01-12.0Hz', 
+        'left green 0.01-12.0Hz', 
+        'right blue 0.01-12.0Hz',
+        'right green 0.01-12.0Hz',
+        'left 0.01-12.0Hz',
+        'right 0.01-12.0Hz',
+        'left 0.01-3.0Hz',
+        'right 0.01-3.0Hz'
         :type: str 
         :param subfolder: can be specified as 'Behaviour'
         :type: str
@@ -100,91 +109,91 @@ class Data:
             'left blue 0.01-3.0Hz', 
             'left green 0.01-3.0Hz', 
             'right blue 0.01-3.0Hz',
-            'right green 0.01-3.0Hz'
+            'right green 0.01-3.0Hz',
             'left blue 0.01-12.0Hz', 
             'left green 0.01-12.0Hz', 
             'right blue 0.01-12.0Hz',
-            'right green 0.01-12.0Hz'
-            'left 0.01-12.0Hz'
-            'right 0.01-12.0Hz'
-            'left 0.01-3.0Hz'
+            'right green 0.01-12.0Hz',
+            'left 0.01-12.0Hz',
+            'right 0.01-12.0Hz',
+            'left 0.01-3.0Hz',
             'right 0.01-3.0Hz'
             ]
 
         if fname not in fnames:
             raise ValueError(f'{fname} is not a valid filename. Check help(<directory>.file) for a list of filenames')
 
-        if subfolder is 'Behaviour':   
+        if subfolder == 'Behaviour':   
             direc = os.path.join(str(exp_folder), subfolder)        
             for root, dirs, files in os.walk(direc): 
                 for f in files:
-                    if 'timestamps' in f and fname is 'timestamps':
+                    if 'timestamps' in f and fname == 'timestamps':
                         return str(Path(os.path.join(root, f)))
-                    elif 'interpolated' in f and not 'subset' in f and fname is 'interpolated':
+                    elif 'subset_interpolated' in f and fname == 'subset interpolated':
                         return str(Path(os.path.join(root, f)))
-                    elif 'interpolated' in f and fname is 'interpolated':
+                    elif 'interpolated' in f and fname == 'interpolated':
                         return str(Path(os.path.join(root, f)))
-                    elif 'h264' in f and fname is 'h264':
+                    elif 'h264' in f and fname == 'h264':
                         return str(Path(os.path.join(root, f)))                     
             raise FileNotFoundError(f'File {fname} does not exist in subfolder {subfolder}') 
         
-        elif subfolder is None:         
+        elif subfolder == None:         
             for root, dirs, files in os.walk(str(exp_folder)):
                 for f in files:
                     if 'combined' in f and 'raw' in f and 'upscaled' not in f:
                         if not 'gsr' in f:
                             if '0.01-3' in f:
-                                if fname is 'combined':
+                                if fname == 'combined':
                                     return Path(os.path.join(root, f))
-                    elif 'processed' in f and fname is 'processed':
+                    elif 'processed' in f and fname == 'processed':
                         return str(Path(os.path.join(root, f)))
-                    elif 'mean_stim_frames.raw' in f and fname is 'mean_stim_frames':
+                    elif 'mean_stim_frames.raw' in f and fname == 'mean_stim_frames':
                         return str(Path(os.path.join(root, f)))
-                    elif 'fixed_stim_frames' in f and fname is 'fixed-stim_frames':
+                    elif 'fixed_stim_frames' in f and fname == 'fixed-stim_frames':
                         return str(Path(os.path.join(root, f)))
-                    elif 'LM_mask' in f and fname is 'LM_mask':
+                    elif 'LM_mask' in f and fname == 'LM_mask':
                         return str(Path(os.path.join(root, f)))
 
                     elif 'BLUE' in f:
                         if 'LEFT' in f:
-                            if 'RAW' in f and fname is 'left blue':
+                            if 'RAW' in f and fname == 'left blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname is 'left blue 0.01-3.0Hz':
+                            if '0.01-3.0' and fname == 'left blue 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname is 'left blue 0.01-12.0Hz':
+                            if '0.01-12.0' and fname == 'left blue 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))
                         if 'RIGHT' in f:
-                            if 'RAW' in f and fname is 'right blue':
+                            if 'RAW' in f and fname == 'right blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname is 'right blue 0.01-3.0Hz':
+                            if '0.01-3.0' and fname == 'right blue 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname is 'right blue 0.01-12.0Hz':
+                            if '0.01-12.0' and fname == 'right blue 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                     elif 'GREEN' in f:
                         if 'LEFT' in f:
-                            if 'RAW' in f and fname is 'left green':
+                            if 'RAW' in f and fname == 'left green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname is 'left green 0.01-3.0Hz':
+                            if '0.01-3.0' and fname == 'left green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname is 'left green 0.01-12.0Hz':
+                            if '0.01-12.0' and fname == 'left green 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                         if 'RIGHT' in f:
-                            if 'RAW' in f and fname is 'right green':
+                            if 'RAW' in f and fname == 'right green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname is 'right green 0.01-3.0Hz':
+                            if '0.01-3.0' and fname == 'right green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname is 'right green 0.01-12.0Hz':
+                            if '0.01-12.0' and fname == 'right green 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                     
                     elif 'LEFT_corrected' in f:
-                        if '0.01-3.0' in f and fname is 'left 0.01-3.0Hz':
+                        if '0.01-3.0' in f and fname == 'left 0.01-3.0Hz':
                             return str(Path(os.path.join(root, f)))
-                        if '0.01-12.0' in f and fname is 'left 0.01-12.0Hz':
+                        if '0.01-12.0' in f and fname == 'left 0.01-12.0Hz':
                             return str(Path(os.path.join(root, f)))
                     elif 'RIGHT_corrected' in f:
-                        if '0.01-3.0' in f and fname is 'right 0.01-3.0Hz':
+                        if '0.01-3.0' in f and fname == 'right 0.01-3.0Hz':
                             return str(Path(os.path.join(root, f)))
-                        if '0.01-12.0' in f and fname is 'right 0.01-12.0Hz':
+                        if '0.01-12.0' in f and fname == 'right 0.01-12.0Hz':
                             return str(Path(os.path.join(root, f)))
 
 
@@ -225,7 +234,7 @@ class Output:
         :return: file name of result
         :type: str
         """
-        if path is "":
+        if path == "":
             direc = self.directory + f'/{dirname}/'
             if isdir(direc) is False:
                 direc = os.mkdir(direc)
