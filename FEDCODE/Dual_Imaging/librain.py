@@ -210,19 +210,21 @@ class Output:
         self.directory = directory
 
 
-    def saveas(self, f_in, f_out, suffix, ftype, save=False, path="", dirname="Derivatives", fig=False):
+    def saveas(self, f_out, suffix, ftype, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
         """
         Returns file name of a result with the same naming convention as the corresponding raw data. 
         The result can also be saved.
 
-        :param f_in: complete path to raw file from which the result was derived
-        :type: str 
         :param f_out: the result to be saved
         :type: any
-        :param suffix: word or phrase to append to the raw file name (i.e. <raw file>_PROCESSED)
+        :param suffix: word or phrase to append to the raw file name (i.e. <raw file>_PROCESSED) OR unique file name
         :type: str
         :param ftype: desired file type
         :type: str
+        :param f_in: complete path to raw file from which the result was derived; leave out to customize file name
+        :type: str 
+        :param save: saves the result if True
+        :type: bool
         :param path: complete path to the directory in which the file will be saved; if unspecified, the file
         will be saved in "Derivatives" folder created automatically within self.directory
         :type: str
@@ -234,7 +236,7 @@ class Output:
         :return: file name of result
         :type: str
         """
-        if path == "":
+        if path == None:
             direc = self.directory + f'/{dirname}/'
             if isdir(direc) is False:
                 direc = os.mkdir(direc)
@@ -249,17 +251,20 @@ class Output:
         if isfile(f_in) is False:
             raise FileNotFoundError(f'{f_in} does not exist')
 
-        # isolate file name
-        if '/' in f_in: 
-            fname = f_in.split('/')[-1].split('.')
-        elif '\\' in f_in:
-            fname = f_in.split('\\')[-1].split('.')
-        rm_type = ""
-        for i in range(len(fname)-1): 
-            # Removes file type. In case there are periods in the file name, 
-            # concatenate up to but not including the file type. 
-            rm_type += fname[i]
-        fname = rm_type + f'_{suffix}' + f'.{ftype}'
+        if f_in == None:
+            fname = suffix + f'.{ftype}'
+        else:
+            # isolate file name
+            if '/' in f_in: 
+                fname = f_in.split('/')[-1].split('.')
+            elif '\\' in f_in:
+                fname = f_in.split('\\')[-1].split('.')
+            rm_type = ""
+            for i in range(len(fname)-1): 
+                # Removes file type. In case there are periods in the file name, 
+                # concatenate up to but not including the file type. 
+                rm_type += fname[i]
+            fname = rm_type + f'_{suffix}' + f'.{ftype}'
             
         path = Path(direc+fname)
 
