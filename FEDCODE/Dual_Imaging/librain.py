@@ -210,7 +210,7 @@ class Output:
         self.directory = directory
 
 
-    def saveas(self, f_out, suffix, ftype, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
+    def saveas(self, f_out, suffix, ftype, dtype=None, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
         """
         Returns file name of a result with the same naming convention as the corresponding raw data. 
         The result can also be saved.
@@ -220,6 +220,8 @@ class Output:
         :param suffix: word or phrase to append to the raw file name (i.e. <raw file>_PROCESSED) OR unique file name
         :type: str
         :param ftype: desired file type
+        :type: str
+        :param dtype: desired numpy data type; ftype must be set to 'raw'
         :type: str
         :param f_in: complete path to raw file from which the result was derived; leave out to customize file name
         :type: str 
@@ -247,13 +249,12 @@ class Output:
                 direc = path + f'/{dirname}/'
                 if isdir(direc) is False:
                     direc = os.mkdir(direc)
-        
-        if isfile(f_in) is False:
-            raise FileNotFoundError(f'{f_in} does not exist')
 
         if f_in == None:
             fname = suffix + f'.{ftype}'
         else:
+            if isfile(f_in) is False:
+                raise FileNotFoundError(f'{f_in} does not exist')
             # isolate file name
             if '/' in f_in: 
                 fname = f_in.split('/')[-1].split('.')
@@ -271,12 +272,20 @@ class Output:
         if save is True:
             if fig is True:
                 f_out.savefig(path)
-                print(f"Saved as {fname}")
+                print(f'Saved as {fname}')
                 return fname
             else:
-                np.save(path, f_out)
-                print(f"Saved as {fname}")
-                return fname
+                if ftype == 'raw':
+                    if dtype == None:
+                        raise TypeError('dtype cannot be empty; must be a valid numpy data type')
+                    else:
+                        f_out.astype(np.dtype(dtype)).tofile(direc+fname)
+                        print(f'Saved as {fname}')
+                        return fname
+                else:
+                    np.save(path, f_out)
+                    print(f'Saved as {fname}')
+                    return fname
         else:
             return fname 
 
