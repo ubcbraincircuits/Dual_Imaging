@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.io as sio
 import os
 from os.path import join, getsize, isfile, isdir
 from pathlib import Path
@@ -32,7 +33,7 @@ class Data:
         :return: all files in the experiment directory
         :type: list
         """
-        if type(date) == str:
+        if type(date) is str:
             d_format = parse(date)
             d = f"/{d_format.year}{d_format:%m}{d_format:%d}"
             date_path = Path(str(self.directory) + d) 
@@ -42,7 +43,7 @@ class Data:
                 exp = f"/Experiment_{exp_num}"
                 exp_folder = Path(str(date_path) + exp)
                 if isdir(exp_folder) is True:
-                    if listfiles == True:
+                    if listfiles is True:
                         files = [file for file in os.listdir(exp_folder)]
                         return str(exp_folder), files
                     else:
@@ -84,7 +85,8 @@ class Data:
         """
         fnames = [
             'timestamps', 
-            'interpolated', 
+            'interpolated',
+            'subset interpolated', 
             'h264', 
             'combined', 
             'processed',
@@ -99,12 +101,20 @@ class Data:
             'left green 0.01-3.0Hz', 
             'right blue 0.01-3.0Hz',
             'right green 0.01-3.0Hz'
+            'left blue 0.01-12.0Hz', 
+            'left green 0.01-12.0Hz', 
+            'right blue 0.01-12.0Hz',
+            'right green 0.01-12.0Hz'
+            'left 0.01-12.0Hz'
+            'right 0.01-12.0Hz'
+            'left 0.01-3.0Hz'
+            'right 0.01-3.0Hz'
             ]
 
         if fname not in fnames:
             raise ValueError(f'{fname} is not a valid filename. Check help(<directory>.file) for a list of filenames')
 
-        if subfolder == 'Behaviour':   
+        if subfolder is 'Behaviour':   
             direc = os.path.join(str(exp_folder), subfolder)        
             for root, dirs, files in os.walk(direc): 
                 for f in files:
@@ -112,50 +122,72 @@ class Data:
                         return str(Path(os.path.join(root, f)))
                     elif 'interpolated' in f and not 'subset' in f and fname is 'interpolated':
                         return str(Path(os.path.join(root, f)))
+                    elif 'interpolated' in f and fname is 'interpolated':
+                        return str(Path(os.path.join(root, f)))
                     elif 'h264' in f and fname is 'h264':
                         return str(Path(os.path.join(root, f)))                     
             raise FileNotFoundError(f'File {fname} does not exist in subfolder {subfolder}') 
         
-        elif subfolder == None:         
+        elif subfolder is None:         
             for root, dirs, files in os.walk(str(exp_folder)):
                 for f in files:
                     if 'combined' in f and 'raw' in f and 'upscaled' not in f:
                         if not 'gsr' in f:
                             if '0.01-3' in f:
-                                if fname == 'combined':
+                                if fname is 'combined':
                                     return Path(os.path.join(root, f))
-                    elif 'processed' in f and fname == 'processed':
+                    elif 'processed' in f and fname is 'processed':
                         return str(Path(os.path.join(root, f)))
-                    elif 'mean_stim_frames.raw' in f and fname == 'mean_stim_frames':
+                    elif 'mean_stim_frames.raw' in f and fname is 'mean_stim_frames':
                         return str(Path(os.path.join(root, f)))
-                    elif 'fixed_stim_frames' in f and fname == 'fixed-stim_frames':
+                    elif 'fixed_stim_frames' in f and fname is 'fixed-stim_frames':
                         return str(Path(os.path.join(root, f)))
-                    elif 'LM_mask' in f and fname == 'LM_mask':
+                    elif 'LM_mask' in f and fname is 'LM_mask':
                         return str(Path(os.path.join(root, f)))
 
                     elif 'BLUE' in f:
                         if 'LEFT' in f:
-                            if 'RAW' in f and fname == 'left blue':
+                            if 'RAW' in f and fname is 'left blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'left blue 0.01-3.0Hz':
+                            if '0.01-3.0' and fname is 'left blue 0.01-3.0Hz':
+                                return str(Path(os.path.join(root, f)))
+                            if '0.01-12.0' and fname is 'left blue 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))
                         if 'RIGHT' in f:
-                            if 'RAW' in f and fname == 'right blue':
+                            if 'RAW' in f and fname is 'right blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'right blue 0.01-3.0Hz':
+                            if '0.01-3.0' and fname is 'right blue 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
+                            if '0.01-12.0' and fname is 'right blue 0.01-12.0Hz':
+                                return str(Path(os.path.join(root, f)))   
                     elif 'GREEN' in f:
                         if 'LEFT' in f:
-                            if 'RAW' in f and fname == 'left green':
+                            if 'RAW' in f and fname is 'left green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'left green 0.01-3.0Hz':
+                            if '0.01-3.0' and fname is 'left green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
+                            if '0.01-12.0' and fname is 'left green 0.01-12.0Hz':
+                                return str(Path(os.path.join(root, f)))   
                         if 'RIGHT' in f:
-                            if 'RAW' in f and fname == 'right green':
+                            if 'RAW' in f and fname is 'right green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'right green 0.01-3.0Hz':
+                            if '0.01-3.0' and fname is 'right green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-        
+                            if '0.01-12.0' and fname is 'right green 0.01-12.0Hz':
+                                return str(Path(os.path.join(root, f)))   
+                    
+                    elif 'LEFT_corrected' in f:
+                        if '0.01-3.0' in f and fname is 'left 0.01-3.0Hz':
+                            return str(Path(os.path.join(root, f)))
+                        if '0.01-12.0' in f and fname is 'left 0.01-12.0Hz':
+                            return str(Path(os.path.join(root, f)))
+                    elif 'RIGHT_corrected' in f:
+                        if '0.01-3.0' in f and fname is 'right 0.01-3.0Hz':
+                            return str(Path(os.path.join(root, f)))
+                        if '0.01-12.0' in f and fname is 'right 0.01-12.0Hz':
+                            return str(Path(os.path.join(root, f)))
+
+
             raise FileNotFoundError(f'File {fname} does not exist')
 
         else:
@@ -182,8 +214,8 @@ class Output:
         :type: str
         :param ftype: desired file type
         :type: str
-        :param path: directory in which the file will be saved; if unspecified, the file will
-        be saved in "Derivatives" folder created automatically within self.directory
+        :param path: complete path to the directory in which the file will be saved; if unspecified, the file
+        will be saved in "Derivatives" folder created automatically within self.directory
         :type: str
         :param dirname: name of the directory in which the file will be saved
         :type: str
@@ -193,7 +225,7 @@ class Output:
         :return: file name of result
         :type: str
         """
-        if path == "":
+        if path is "":
             direc = self.directory + f'/{dirname}/'
             if isdir(direc) is False:
                 direc = os.mkdir(direc)
@@ -223,7 +255,7 @@ class Output:
         path = Path(direc+fname)
 
         if save is True:
-            if fig == True:
+            if fig is True:
                 f_out.savefig(path)
                 print(f"Saved as {fname}")
                 return fname
