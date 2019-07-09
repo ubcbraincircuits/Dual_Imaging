@@ -264,7 +264,10 @@ class Output:
             for i in range(len(fname)-1): 
                 # Removes file type. In case there are periods in the file name, 
                 # concatenate up to but not including the file type. 
-                rm_type += fname[i]
+                if i == len(fname)-2:
+                    rm_type += fname[i]
+                else:
+                    rm_type += fname[i] + '.'
             fname = rm_type + f'_{suffix}' + f'.{ftype}'
             
         path = Path(direc+fname)
@@ -277,7 +280,9 @@ class Output:
             else:
                 if ftype == 'raw':
                     if dtype == None:
-                        raise TypeError('dtype cannot be empty; must be a valid numpy data type')
+                        f_out.tofile(direc+fname)
+                        print(f'Saved as {fname}')
+                        return fname
                     else:
                         f_out.astype(np.dtype(dtype)).tofile(direc+fname)
                         print(f'Saved as {fname}')
