@@ -208,12 +208,12 @@ class Data:
                         if f[5] == 'L':
                             if 'timestamps' in f and fname == 'left timestamps':
                                 return str(Path(os.path.join(root, f)))
-                            if fname == 'left':
+                            if not 'bandpass' in f and fname == 'left':
                                 return str(Path(os.path.join(root, f)))
                         if f[5] == 'R':
                             if 'timestamps' in f and fname == 'right timestamps':
                                 return str(Path(os.path.join(root, f)))
-                            if fname == 'right':
+                            if not 'bandpass' in f and fname == 'right':
                                 return str(Path(os.path.join(root, f)))
                         
             raise FileNotFoundError(f'File {fname} does not exist')
