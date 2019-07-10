@@ -84,7 +84,11 @@ class Data:
         'left 0.01-12.0Hz',
         'right 0.01-12.0Hz',
         'left 0.01-3.0Hz',
-        'right 0.01-3.0Hz'
+        'right 0.01-3.0Hz',
+        'left',
+        'right',
+        'left timestamps',
+        'right timestamps'
         :type: str 
         :param subfolder: can be specified as 'Behaviour'
         :type: str
@@ -117,7 +121,11 @@ class Data:
             'left 0.01-12.0Hz',
             'right 0.01-12.0Hz',
             'left 0.01-3.0Hz',
-            'right 0.01-3.0Hz'
+            'right 0.01-3.0Hz',
+            'left',
+            'right',
+            'left timestamps',
+            'right timestamps'
             ]
 
         if fname not in fnames:
@@ -158,31 +166,31 @@ class Data:
                         if 'LEFT' in f:
                             if 'RAW' in f and fname == 'left blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'left blue 0.01-3.0Hz':
+                            if '0.01-3.0' in f and fname == 'left blue 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname == 'left blue 0.01-12.0Hz':
+                            if '0.01-12.0' in f and fname == 'left blue 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))
                         if 'RIGHT' in f:
                             if 'RAW' in f and fname == 'right blue':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'right blue 0.01-3.0Hz':
+                            if '0.01-3.0' in f and fname == 'right blue 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname == 'right blue 0.01-12.0Hz':
+                            if '0.01-12.0' in f and fname == 'right blue 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                     elif 'GREEN' in f:
                         if 'LEFT' in f:
                             if 'RAW' in f and fname == 'left green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'left green 0.01-3.0Hz':
+                            if '0.01-3.0' in f and fname == 'left green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname == 'left green 0.01-12.0Hz':
+                            if '0.01-12.0' in f and fname == 'left green 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                         if 'RIGHT' in f:
                             if 'RAW' in f and fname == 'right green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' and fname == 'right green 0.01-3.0Hz':
+                            if '0.01-3.0' in f and fname == 'right green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-12.0' and fname == 'right green 0.01-12.0Hz':
+                            if '0.01-12.0' in f and fname == 'right green 0.01-12.0Hz':
                                 return str(Path(os.path.join(root, f)))   
                     
                     elif 'LEFT_corrected' in f:
@@ -196,7 +204,18 @@ class Data:
                         if '0.01-12.0' in f and fname == 'right 0.01-12.0Hz':
                             return str(Path(os.path.join(root, f)))
 
-
+                    elif not 'LEFT' in f and not 'RIGHT' in f:
+                        if f[5] == 'L':
+                            if 'timestamps' in f and fname == 'left timestamps':
+                                return str(Path(os.path.join(root, f)))
+                            if fname == 'left':
+                                return str(Path(os.path.join(root, f)))
+                        if f[5] == 'R':
+                            if 'timestamps' in f and fname == 'right timestamps':
+                                return str(Path(os.path.join(root, f)))
+                            if fname == 'right':
+                                return str(Path(os.path.join(root, f)))
+                        
             raise FileNotFoundError(f'File {fname} does not exist')
 
         else:
