@@ -192,7 +192,7 @@ class Data:
                         if 'LEFT' in f:
                             if 'RAW' in f and fname == 'left green':
                                 return str(Path(os.path.join(root, f)))
-                            if '0.01-3.0' in f and 'TRUNCATED' in f and fname == 'trunc':
+                            if '0.01-3.0' in f and 'TRUNCATED.npy' in f and fname == 'trunc':
                                 return str(Path(os.path.join(root, f)))
                             if '0.01-3.0' in f and fname == 'left green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
