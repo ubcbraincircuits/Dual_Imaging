@@ -156,7 +156,7 @@ class Data:
                         return str(Path(os.path.join(root, f)))                     
             raise FileNotFoundError(f'File {fname} does not exist in subfolder {subfolder}') 
         
-        elif subfolder == None:         
+        elif subfolder == None:
             for root, dirs, files in os.walk(str(exp_folder)):
                 for f in files:
                     if 'combined' in f and 'raw' in f and 'upscaled' not in f:
@@ -172,6 +172,18 @@ class Data:
                         return str(Path(os.path.join(root, f)))
                     elif 'LM_mask' in f and fname == 'LM_mask':
                         return str(Path(os.path.join(root, f)))
+
+                    elif 'frequency_split_correlation_filtered_ws' in f:
+                        if '3800' in f and fname == 'freq split ws=3800':
+                            return str(Path(os.path.join(root, f)))
+                        if '5000' in f and fname == 'freq split ws=5000':
+                            return str(Path(os.path.join(root, f)))
+                        if '1000' in f and fname == 'freq split ws=1000':
+                            return str(Path(os.path.join(root, f)))
+                        if '2000' in f and fname == 'freq split ws=2000':
+                            return str(Path(os.path.join(root, f)))
+                        if '2800' in f and fname == 'freq split ws=2800':
+                            return str(Path(os.path.join(root, f)))
 
                     elif 'BLUE' in f:
                         if 'LEFT' in f:
@@ -228,18 +240,6 @@ class Data:
                                 return str(Path(os.path.join(root, f)))
                             if not 'bandpass' in f and fname == 'right':
                                 return str(Path(os.path.join(root, f)))
-
-                    elif 'frequency_split_correlation_filtered_ws' in f:
-                        if '3800' in f and fname == 'freq split ws=3800':
-                            return str(Path(os.path.join(root, f)))
-                        if '5000' in f and fname == 'freq split ws=5000':
-                            return str(Path(os.path.join(root, f)))
-                        if '1000' in f and fname == 'freq split ws=1000':
-                            return str(Path(os.path.join(root, f)))
-                        if '2000' in f and fname == 'freq split ws=2000':
-                            return str(Path(os.path.join(root, f)))
-                        if '2800' in f and fname == 'freq split ws=2800':
-                            return str(Path(os.path.join(root, f)))
 
             raise FileNotFoundError(f'File {fname} does not exist')
 
