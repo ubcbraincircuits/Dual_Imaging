@@ -135,7 +135,8 @@ class Data:
             'freq split ws=5000',
             'freq split ws=1000',
             'freq split ws=2000',
-            'freq split ws=2800'
+            'freq split ws=2800',
+            'trunc'
             ]
 
         if fname not in fnames:
@@ -190,6 +191,8 @@ class Data:
                     elif 'GREEN' in f:
                         if 'LEFT' in f:
                             if 'RAW' in f and fname == 'left green':
+                                return str(Path(os.path.join(root, f)))
+                            if '0.01-3.0' in f and 'TRUNCATED' in f and fname == 'trunc':
                                 return str(Path(os.path.join(root, f)))
                             if '0.01-3.0' in f and fname == 'left green 0.01-3.0Hz':
                                 return str(Path(os.path.join(root, f)))
