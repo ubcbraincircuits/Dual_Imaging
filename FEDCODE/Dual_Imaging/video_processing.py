@@ -441,9 +441,9 @@ class Filter:
         bandpass_filter = delayed(Filter.lfilter)
         result = Parallel(n_jobs=n_jobs, verbose=0)(
             bandpass_filter(
-                frames[:, s],
                 self.numerator,
                 self.denominator,
+                frames[:, s]
             )
             for s in gen_even_slices(
                 frames.shape[1], n_jobs
