@@ -254,18 +254,20 @@ class Output:
         self.directory = directory
 
 
-    def saveas(self, f_out, suffix, ftype, dtype=None, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
+    def saveas(self, f_out, prefix, suffix, ftype, dtype=None, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
         """
         Returns file name of a result with the same naming convention as the corresponding raw data. 
         The result can also be saved.
 
         :param f_out: the result to be saved
         :type: any
-        :param suffix: word or phrase to append to the raw file name (i.e. <raw file>_PROCESSED) OR unique file name
+        :param prefix: word or phrase to append to the beginning of the file name (i.e. LEFT_GREEN_<file>)
+        :type: str
+        :param suffix: word or phrase to append to the end of the file name (i.e. <file>_PROCESSED) OR unique file name
         :type: str
         :param ftype: desired file type
         :type: str
-        :param dtype: desired numpy data type; ftype must be set to 'raw'
+        :param dtype: desired numpy data type, i.e. 'float32'; ftype must be set to 'raw'
         :type: str
         :param f_in: complete path to raw file from which the result was derived; leave out to customize file name
         :type: str 
@@ -312,7 +314,13 @@ class Output:
                     rm_type += fname[i]
                 else:
                     rm_type += fname[i] + '.'
-            fname = rm_type + f'_{suffix}' + f'.{ftype}'
+            
+            if suffix == None:
+                if prefix == None:
+                    raise ValueError('Specify a value for prefix. For unique file names, use suffix')
+                fname = f'{prefix}_' + rm_type + f'.{ftype}'
+            else:
+                fname = rm_type + f'_{suffix}' + f'.{ftype}'
             
         path = Path(direc+fname)
 
