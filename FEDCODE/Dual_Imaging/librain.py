@@ -89,6 +89,11 @@ class Data:
         'right',
         'left timestamps',
         'right timestamps'
+        'freq split ws=3800',
+        'freq split ws=5000',
+        'freq split ws=1000',
+        'freq split ws=2000',
+        'freq split ws=2800'
         :type: str 
         :param subfolder: can be specified as 'Behaviour'
         :type: str
@@ -97,9 +102,9 @@ class Data:
         :type: str
         """
         fnames = [
-            'timestamps', 
+            'timestamps',
+            'subset interpolated',
             'interpolated',
-            'subset interpolated', 
             'h264', 
             'combined', 
             'processed',
@@ -125,7 +130,12 @@ class Data:
             'left',
             'right',
             'left timestamps',
-            'right timestamps'
+            'right timestamps',
+            'freq split ws=3800',
+            'freq split ws=5000',
+            'freq split ws=1000',
+            'freq split ws=2000',
+            'freq split ws=2800'
             ]
 
         if fname not in fnames:
@@ -215,7 +225,19 @@ class Data:
                                 return str(Path(os.path.join(root, f)))
                             if not 'bandpass' in f and fname == 'right':
                                 return str(Path(os.path.join(root, f)))
-                        
+
+                    elif 'frequency_split_correlation_filtered_ws' in f:
+                        if '3800' in f and fname == 'freq split ws=3800':
+                            return str(Path(os.path.join(root, f)))
+                        if '5000' in f and fname == 'freq split ws=5000':
+                            return str(Path(os.path.join(root, f)))
+                        if '1000' in f and fname == 'freq split ws=1000':
+                            return str(Path(os.path.join(root, f)))
+                        if '2000' in f and fname == 'freq split ws=2000':
+                            return str(Path(os.path.join(root, f)))
+                        if '2800' in f and fname == 'freq split ws=2800':
+                            return str(Path(os.path.join(root, f)))
+
             raise FileNotFoundError(f'File {fname} does not exist')
 
         else:
