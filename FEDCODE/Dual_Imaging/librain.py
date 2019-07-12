@@ -1,3 +1,13 @@
+"""
+librain, the Brain Library.
+
+Created to support data processing for the study, "Mesoscale cortical calcium imaging reveals widespread synchronized infraslow 
+activity during social touch in mice" by the Murphy Lab at the University of British Columbia.
+
+This module can generate file names, return a complete path to a file, and save results such that the naming convention
+used by the source data is maintained.
+"""
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,10 +62,10 @@ class Data:
                     raise Exception(f'Folder Experiment {exp_num} does not exist in folder {d}')
                 
 
-    def file(self, exp_folder, fname, subfolder=None):
+    def file(self, exp_folder, fname, subfolder=""):
         """
-        Returns fname if it exists in exp_folder. If fname is not in exp_folder, 
-        an exception is raised.
+        Returns complete path to fname if it exists in exp_folder or within its subfolders, Behaviour or Derivatives. 
+        If fname is not in exp_folder, an exception is raised.
 
         :param exp_folder: complete path to experiment folder, i.e. Experiment 1
         :type: str
@@ -94,7 +104,7 @@ class Data:
         'freq split ws=2000',
         'freq split ws=2800'
         :type: str 
-        :param subfolder: can be specified as 'Behaviour'
+        :param subfolder: can be specified as 'Behaviour' or 'Derivatives'
         :type: str
 
         :return: full path to fname 
@@ -154,8 +164,9 @@ class Data:
                         return str(Path(os.path.join(root, f)))                     
             raise FileNotFoundError(f'File {fname} does not exist in subfolder {subfolder}') 
         
-        elif subfolder == None:
-            for root, dirs, files in os.walk(str(exp_folder)):
+        elif subfolder == "" or subfolder == "Derivatives":
+            direc = os.path.join(str(exp_folder), subfolder) 
+            for root, dirs, files in os.walk(direc):
                 for f in files:
                     if 'combined' in f and 'raw' in f and 'upscaled' not in f:
                         if not 'gsr' in f:
@@ -237,7 +248,7 @@ class Data:
                             if not 'bandpass' in f and fname == 'right':
                                 return str(Path(os.path.join(root, f)))
 
-            raise FileNotFoundError(f'File {fname} does not exist')
+            raise FileNotFoundError(f'File {fname} does not exist in {exp_folder}')
 
         else:
             raise FileNotFoundError(f'Subfolder {subfolder} does not exist in folder {exp_folder}')
