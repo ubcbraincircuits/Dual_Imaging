@@ -262,13 +262,12 @@ def insert_interpolated_frames(
     :return: array of frames with dropped frames filled
     :type: numpy.ndarray
     """
-    shifting_index = 0
+    shifting_index = 1
     for interpolated_frames in list_of_interpolated_frames:
         frames = numpy.insert(
             frames,
             interpolated_frames.location
-            + shifting_index
-            + 1,
+            + shifting_index,
             interpolated_frames.interpolated_frames,
             0,
         )
