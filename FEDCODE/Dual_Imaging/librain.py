@@ -254,7 +254,7 @@ class Output:
         self.directory = directory
 
 
-    def saveas(self, f_out, suffix, ftype, prefix=None, dtype=None, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
+    def saveas(self, f_out, ftype, suffix=None, prefix=None, dtype=None, f_in=None, save=False, path=None, dirname="Derivatives", fig=False):
         """
         Returns file name of a result with the same naming convention as the corresponding raw data. 
         The result can also be saved.
