@@ -1,6 +1,6 @@
 """
 This module provides examples of file names that correspond to valid values of the argument "fname" in the
-saveas function of the librain module.
+saveas function of the librain Python module.
 """
 
 fnames = {  ###Behaviour###
