@@ -66,9 +66,8 @@ class Data:
         'h264', 
         'combined', 
         'processed',
-        'mean_stim_frames', 
-        'fixed_stim_frames', 
-        'LM_mask', 
+        'RM mask'
+        'LM mask', 
         'left blue', 
         'left green', 
         'right blue',
@@ -108,9 +107,8 @@ class Data:
             'h264', 
             'combined', 
             'processed',
-            'mean_stim_frames', 
-            'fixed_stim_frames', 
-            'LM_mask', 
+            'RM mask'
+            'LM mask', 
             'left blue', 
             'left green', 
             'right blue',
@@ -166,11 +164,9 @@ class Data:
                                     return Path(os.path.join(root, f))
                     elif 'processed' in f and fname == 'processed':
                         return str(Path(os.path.join(root, f)))
-                    elif 'mean_stim_frames.raw' in f and fname == 'mean_stim_frames':
+                    elif 'RM_mask' in f and fname == 'RM mask':
                         return str(Path(os.path.join(root, f)))
-                    elif 'fixed_stim_frames' in f and fname == 'fixed-stim_frames':
-                        return str(Path(os.path.join(root, f)))
-                    elif 'LM_mask' in f and fname == 'LM_mask':
+                    elif 'LM_mask' in f and fname == 'LM mask':
                         return str(Path(os.path.join(root, f)))
 
                     elif 'frequency_split_correlation_filtered_ws' in f:
