@@ -505,6 +505,7 @@ def load_frames(filename, color):
     else: 
         frames = numpy.zeros((num_frames, height, width), dtype=numpy.uint8)
     index = 0
+    cap = cv2.VideoCapture(filename)
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
