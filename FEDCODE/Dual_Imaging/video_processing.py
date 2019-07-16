@@ -486,28 +486,34 @@ def load_frames(filename, color):
         raise AttributeError(
             "Argument 'color' must be one of ('red', 'green', 'blue', 'all', False)"
         )
-    first_frame = True
     cap = cv2.VideoCapture(filename)
+    num_frames = 0
+    while cap.isOpened:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        num_frames +=1
+    cap.release()
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    if color == 'all':
+        frames = numpy.zeros((num_frames, height, width, 3), dtype=numpy.uint8)
+    else: 
+        frames = numpy.zeros((num_frames, height, width), dtype=numpy.uint8)
+    index = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
         if not color:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frames[index] = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         elif color == 'all':
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frames[index] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         else:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[
+            frames[index] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[
                 ..., channel
             ]
-        if first_frame:
-            frames = numpy.expand_dims(frame, 0)
-            first_frame = False
-        else:
-            frames = numpy.concatenate(
-                (frames, numpy.expand_dims(frame, 0)),
-                axis=0,
-            )
+        index+=1
     cap.release()
     return frames
 
