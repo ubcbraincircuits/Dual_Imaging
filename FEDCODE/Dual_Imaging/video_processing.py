@@ -471,20 +471,20 @@ def correct_channel_a_by_b(a, b):
 
 def load_frames(filename, color):
     """
-    Load frames of .h264/5 as color channel or B&W frames as numpy array
+    Load frames of .h264/5 as color channel(s) or B&W frames as numpy array
 
     :param filename: path to video file
     :type: str
-    :param color: one of ('red', 'green', 'blue', False), with False for B&W
+    :param color: one of ('red', 'green', 'blue', 'all', False), with False for B&W
     :type: str or bool
 
     :return: video frames
     :type: numpy.ndarray
     """
-    channel = {"red": 0, "green": 1, "blue": 2}.get(color)
+    channel = {"red": 0, "green": 1, "blue": 2, False:'', "all":''}.get(color)
     if channel is None:
         raise AttributeError(
-            "Argument 'color' must be one of ('red', 'green', 'blue', False)"
+            "Argument 'color' must be one of ('red', 'green', 'blue', 'all', False)"
         )
     first_frame = True
     cap = cv2.VideoCapture(filename)
@@ -494,6 +494,8 @@ def load_frames(filename, color):
             break
         if not color:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        elif color == 'all':
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         else:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)[
                 ..., channel
