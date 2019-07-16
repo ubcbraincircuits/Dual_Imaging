@@ -508,6 +508,7 @@ def load_frames(filename, color):
                 (frames, numpy.expand_dims(frame, 0)),
                 axis=0,
             )
+    cap.release()
     return frames
 
 
