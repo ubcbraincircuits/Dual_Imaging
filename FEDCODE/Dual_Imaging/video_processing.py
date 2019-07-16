@@ -488,14 +488,18 @@ def load_frames(filename, color):
         )
     cap = cv2.VideoCapture(filename)
     num_frames = 0
+    first_frame = True
     while cap.isOpened:
         ret, frame = cap.read()
         if not ret:
             break
+        if first_frame:
+            height, width, _ = frame.shape
+            first_frames = False
         num_frames +=1
     cap.release()
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    if num_frames == 0:
+        raise Exception(f"No frames found in 'filename'")
     if color == 'all':
         frames = numpy.zeros((num_frames, height, width, 3), dtype=numpy.uint8)
     else: 
