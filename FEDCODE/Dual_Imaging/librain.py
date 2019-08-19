@@ -16,7 +16,7 @@ import os
 from os.path import join, getsize, isfile, isdir
 from pathlib import Path
 from dateutil.parser import parse 
-
+import sys, traceback
 class Data:
 
 
@@ -117,7 +117,7 @@ class Data:
             'h264', 
             'combined', 
             'processed',
-            'RM mask'
+            'RM mask',
             'LM mask', 
             'left blue', 
             'left green', 
@@ -144,7 +144,12 @@ class Data:
             'freq split ws=1000',
             'freq split ws=2000',
             'freq split ws=2800',
-            'trunc'
+            'trunc',
+            'left gsr',
+            'right gsr',
+            'left global',
+            'right global',
+            'matlab'
             ]
 
         if fname not in fnames:
@@ -161,7 +166,8 @@ class Data:
                     elif 'interpolated' in f and fname == 'interpolated':
                         return str(Path(os.path.join(root, f)))
                     elif 'h264' in f and fname == 'h264':
-                        return str(Path(os.path.join(root, f)))                     
+                        return str(Path(os.path.join(root, f))) 
+
             raise FileNotFoundError(f'File {fname} does not exist in subfolder {subfolder}') 
         
         elif subfolder == "" or subfolder == "Derivatives":
@@ -170,9 +176,20 @@ class Data:
                 for f in files:
                     if 'combined' in f and 'raw' in f and 'upscaled' not in f:
                         if not 'gsr' in f:
+                            
                             if '0.01-3' in f:
                                 if fname == 'combined':
                                     return Path(os.path.join(root, f))
+                    elif 'left_mouse_gsr' in f and fname == "left gsr":
+                        return str(Path(os.path.join(root, f)))
+                    elif 'right_mouse_gsr' in f and fname == "right gsr":
+                        return str(Path(os.path.join(root, f)))
+                    elif 'l_global_signal' in f and fname == "left global":
+                        return str(Path(os.path.join(root, f))) 
+                    elif 'r_global_signal' in f and fname == "right global":
+                        return str(Path(os.path.join(root, f))) 
+#                     elif 'snips' in f and fname == "matlab":
+#                         return str(Path(os.path.join(root, f)))                    
                     elif 'processed' in f and fname == 'processed':
                         return str(Path(os.path.join(root, f)))
                     elif 'RM_mask' in f and fname == 'RM mask':
@@ -247,8 +264,9 @@ class Data:
                                 return str(Path(os.path.join(root, f)))
                             if not 'bandpass' in f and fname == 'right':
                                 return str(Path(os.path.join(root, f)))
-
-            raise FileNotFoundError(f'File {fname} does not exist in {exp_folder}')
+                            
+                    
+            raise FileNotFoundError(f'File {fname} does not exist in {exp_folder}',)
 
         else:
             raise FileNotFoundError(f'Subfolder {subfolder} does not exist in folder {exp_folder}')
@@ -329,7 +347,7 @@ class Output:
             else:
                 fname = rm_type + f'_{suffix}' + f'.{ftype}'
             
-        path = Path(direc+fname)
+        path = Path(str(direc)+fname)
 
         if save is True:
             if fig is True:

@@ -54,6 +54,7 @@ def extract_RAW_frames(
         time_dim_float = raw_frames.shape[0] / (
             width * height * 3
         )
+        print(time_dim_float)
         time_dim = int(time_dim_float)
         if time_dim != time_dim_float:
             raise Exception(
@@ -292,12 +293,12 @@ class DarkFramesSlice:
         :return: slice object
         :type: slice
         """
-        temporal_means = numpy.mean(frames, axis=(1, 2))
+        temporal_means = abs(numpy.mean(frames, axis=(1, 2)))
         start, end = 0, temporal_means.shape[0]
 
         for i, mean in enumerate(temporal_means):
             if mean > threshold:
-                start = i
+                start = i+1
                 break
         reversed_temporal_means = numpy.flip(
             temporal_means, axis=0
@@ -305,8 +306,8 @@ class DarkFramesSlice:
         del temporal_means
 
         for i, mean in enumerate(reversed_temporal_means):
-            if mean < threshold:
-                end = end - i
+            if mean > threshold:
+                end = end - (i+1)
                 break
         return slice(start, end)
 
@@ -466,7 +467,8 @@ def correct_channel_a_by_b(a, b):
 
     :return: a/(1+b)
     """
-    return a / (1 + b)
+    #return a / (1 + b)
+    return a-b
 
 
 def load_frames(filename, color):
