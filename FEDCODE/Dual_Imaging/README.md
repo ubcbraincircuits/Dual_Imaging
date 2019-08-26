@@ -1,11 +1,16 @@
+
 # Static Renderings of These Notebooks
 ___
 
-## [Dual Imaging](https://nbviewer.jupyter.org/urls/bitbucket.org/ashubhudia/lab/raw/6429f1665d82dd350b5beb0a5c37a08f0dabfbf4/FEDCODE/Dual_Imaging/Dual_Imaging.ipynb)
-#### Processing videos for dual imaging experiments with behavioral footage
-
-## [Whisker Stimulation](https://nbviewer.jupyter.org/urls/bitbucket.org/ashubhudia/lab/raw/6429f1665d82dd350b5beb0a5c37a08f0dabfbf4/FEDCODE/Dual_Imaging/Whisker%20Stimulation.ipynb)
-#### Processing videos for dual imaging experiments, plotting brain activity in stimulation ROI
-
-## [Generate Correlation Matrix](https://nbviewer.jupyter.org/urls/bitbucket.org/ashubhudia/lab/raw/cc4b42d04c02afde5de5f0f0e7e0a36084cc22e1/FEDCODE/Dual_Imaging/Correlation%20Matrix%20Analysis.ipynb)
-#### Generate correlation matrices for dual imagine experiment using seed pixels
+## [Average Frequency Split.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Average%20Frequency%20Split.ipynb)
+## [Compile Data.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Compile%20Data.ipynb)
+## [Correlation Matrix Analysis.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Correlation%20Matrix%20Analysis.ipynb)
+## [Dual_Imaging.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Dual_Imaging.ipynb)
+## [Electrophysiology.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Electrophysiology.ipynb)
+## [Gradient triggered Maps.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Gradient%20triggered%20Maps.ipynb)
+## [Home Cage Analysis.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Home%20Cage%20Analysis.ipynb)
+## [Matrix Analysis Mouse Rail.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Matrix%20Analysis%20Mouse%20Rail.ipynb)
+## [Mesoscale Cluster.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Mesoscale%20Cluster.ipynb)
+## [Seed Pixel and Correlation Matrix One Mouse.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Seed%20Pixel%20and%20Correlation%20Matrix%20One%20Mouse.ipynb)
+## [Untitled.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Untitled.ipynb)
+## [Whisker Stimulation.ipynb](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/Whisker%20Stimulation.ipynb)
