@@ -10,4 +10,4 @@ ___
     for f in os.listdir():
         if 'ipynb' in f and 'checkpoints' not in f:
             wf.write(
-                "## [{}](https://github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/{})\n".format(f, f.replace(" ", "%20"))) 
+                "## [{}](https://nbviewer.jupyter.org/github/ubcbraincircuits/Dual_Imaging/blob/master/FEDCODE/Dual_Imaging/{})\n".format(f, f.replace(" ", "%20"))) 
